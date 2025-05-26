@@ -127,6 +127,10 @@ Chatbot được cấu hình để tự động sử dụng Google Search (thôn
 *   Nếu Gemini sử dụng Google Search, bạn có thể thấy thông báo trong quá trình xử lý.
 *   Sau khi có câu trả lời, nếu có thông tin từ Google Search, một mục **"Thông tin tìm kiếm Google (từ Gemini)"** có thể xuất hiện dưới câu trả lời của chatbot, cho bạn biết các truy vấn mà Gemini đã sử dụng.
 
+Gemini sẽ tự động tra cứu Google đối với các câu hỏi yêu cầu thông tin mới từ phía người dùng:
+![image](https://github.com/user-attachments/assets/35bca240-ccfc-4b3b-a3b1-4da427f15e67)
+
+
 ## Dành cho Nhà phát triển (Chạy ứng dụng cục bộ)
 
 Nếu bạn muốn chạy ứng dụng này trên máy tính của mình:
@@ -226,6 +230,7 @@ Nếu bạn muốn đóng góp cho dự án này, vui lòng fork repository, t�
 ![Screenshot 2025-05-26 115844](https://github.com/user-attachments/assets/48da8490-35ea-4ebf-b917-03170e2bd0a8)
 
 
+![image](https://github.com/user-attachments/assets/81baaf92-095a-4e29-b9b0-a4e688ea4cb9)
 
 
 
