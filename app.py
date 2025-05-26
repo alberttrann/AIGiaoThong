@@ -17,7 +17,7 @@ PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.pdf", "xe_dap_cong_cong_xe_dien_4_b
 GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
 DATABASE_PATH = Path("chat_sessions.db") 
 
-GEMINI_MODEL_ID = "gemini-2.0-flash" # Sticking to user's specified model ID
+GEMINI_MODEL_ID = "gemini-2.0-flash" 
 
 GEMINI_CLIENT = None
 UPLOADED_FILES_CACHE = {} 
@@ -221,8 +221,8 @@ def generate_gemini_response_stream(client, user_prompt_text, current_session_id
             model=model_to_use, contents=gemini_contents, config=generation_config_for_stream,
         )
         placeholder = st.empty()
-        for chunk in response_stream: # chunk is a GenerateContentResponse
-            if hasattr(chunk, 'text') and chunk.text: # Check if chunk.text exists and is not empty
+        for chunk in response_stream: 
+            if hasattr(chunk, 'text') and chunk.text: 
                 full_response_text += chunk.text
                 placeholder.markdown(full_response_text + "▌")
             
@@ -363,7 +363,7 @@ if user_prompt and st.session_state.current_session_id:
         with st.chat_message("assistant"):
             full_response, grounding_meta_dict = generate_gemini_response_stream(
                 GEMINI_CLIENT, user_prompt, st.session_state.current_session_id,
-                st.session_state.chat_history[:-1] # Pass history *before* this user's current message
+                st.session_state.chat_history[:-1] 
             )
             assistant_msg_obj = {"role": "assistant", "content": full_response}
             if grounding_meta_dict: assistant_msg_obj["gemini_grounding_metadata"] = grounding_meta_dict
