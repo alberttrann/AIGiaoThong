@@ -130,6 +130,10 @@ Chatbot được cấu hình để tự động sử dụng Google Search (thôn
 Gemini sẽ tự động tra cứu Google đối với các câu hỏi yêu cầu thông tin mới từ phía người dùng:
 ![image](https://github.com/user-attachments/assets/35bca240-ccfc-4b3b-a3b1-4da427f15e67)
 
+![image](https://github.com/user-attachments/assets/6e57a843-c335-492b-864d-45cee721b2ba)
+
+![image](https://github.com/user-attachments/assets/263b1334-78d8-4a27-a7e4-5ec6622e77f3)
+
 
 ## Dành cho Nhà phát triển (Chạy ứng dụng cục bộ)
 
