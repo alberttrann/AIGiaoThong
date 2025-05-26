@@ -1,4 +1,4 @@
-# Chatbot Giao Thông Công Cộng TP.HCM (Hỗ trợ bởi Gemini API)
+# Chatbot Giao Thông Công Cộng TP.HCM (Hỗ trợ bởi Gemini 2.0 Flash thông qua API)
 
 Chào mừng bạn đến với Chatbot Giao Thông Công Cộng TP.HCM! Đây là một trợ lý AI thông minh được thiết kế để cung cấp thông tin nhanh chóng và chính xác về hệ thống giao thông công cộng tại Thành phố Hồ Chí Minh, bao gồm:
 
@@ -10,6 +10,8 @@ Chào mừng bạn đến với Chatbot Giao Thông Công Cộng TP.HCM! Đây l
 Đây là sản phẩm công nghệ dự thi cuộc thi "Thiết kế sản phẩm tuyên truyền về An toàn giao thông" theo nội dung: "Ứng dụng chuyển đổi số và tăng cường trí tuệ nhân tạo trong việc tuyên truyền về xây dựng văn hoá giao thông an toàn; tuyên truyền về sử dụng năng lượng xanh trong tham gia giao thông". 
 
 Chatbot sử dụng sức mạnh của Google Gemini API để hiểu câu hỏi của bạn và cung cấp câu trả lời dựa trên nội dung từ các tài liệu chuyên đề về giao thông công cộng, cũng như khả năng tìm kiếm thông tin cập nhật trên Google khi cần thiết. Để trải nghiệm, vui lòng truy cập vào web Streamlit này: https://chatbotgtcchcm.streamlit.app/
+
+Ứng dụng được triển khai qua Streamlit Cloud Community. Rate limit hiện tại của Gemini Flash 2.0 là 15 requests mỗi phút, 1 triệu token mỗi phút, và 1500 requests mỗi ngày, khá thoải mái để người dùng cá nhân hỏi đáp với riêng API key cá nhân được lấy từ aistudio.google.com
 
 ## Mục lục
 
