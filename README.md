@@ -108,7 +108,7 @@ Chatbot cho phép bạn có nhiều cuộc trò chuyện riêng biệt, giúp b�
     *   "Xe đạp công cộng TNGO có trạm nào gần công viên Lê Văn Tám không?"
     *   "Làm thế nào để đăng ký thẻ UniPass?"
 
-Như trong những hình dưới đây là người dùng đã thành công tạo phiên trò chuyện mới và tương tác với mô hình trong phiên trò chuyện:
+Như trong những hình dưới đây là người dùng đã thành công thêm api key, tạo phiên trò chuyện mới và tương tác với mô hình trong phiên trò chuyện:
 ![image](https://github.com/user-attachments/assets/8267c015-4823-45c9-8e22-78956929b68d)
 
 ![image](https://github.com/user-attachments/assets/275ee54e-a8aa-4ca8-b84e-e3a4effd74a5)
