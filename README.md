@@ -100,6 +100,11 @@ Chatbot cho phép bạn có nhiều cuộc trò chuyện riêng biệt, giúp b�
     *   "Xe đạp công cộng TNGO có trạm nào gần công viên Lê Văn Tám không?"
     *   "Làm thế nào để đăng ký thẻ UniPass?"
 
+Như trong hình dưới đây là người dùng đã thành công tạo phiên trò chuyện mới và tương tác với mô hình trong phiên trò chuyện:
+![image](https://github.com/user-attachments/assets/8267c015-4823-45c9-8e22-78956929b68d)
+
+
+
 ### Sử dụng Thông tin Tìm kiếm (Google Search)
 
 Chatbot được cấu hình để tự động sử dụng Google Search (thông qua Gemini) nếu thông tin cần thiết không có trong các tài liệu được cung cấp hoặc khi câu hỏi mang tính chất cần thông tin cập nhật theo thời gian thực.
@@ -122,8 +127,8 @@ Nếu bạn muốn chạy ứng dụng này trên máy tính của mình:
 
 1.  **Clone repository (Nếu bạn tải từ GitHub):**
     ```bash
-    git clone <URL_CUA_REPOSITORY>
-    cd <TEN_THU_MUC_REPOSITORY>
+    git clone https://github.com/alberttrann/AIGiaoThong
+    cd AiGiaoThong
     ```
 
 2.  **Tạo môi trường ảo (Khuyến khích):**
@@ -137,7 +142,7 @@ Nếu bạn muốn chạy ứng dụng này trên máy tính của mình:
     Đảm bảo bạn có file `requirements.txt` trong thư mục gốc của dự án với nội dung tối thiểu như sau:
     ```txt
     streamlit
-    google-generativeai
+    google-genai
     # Các thư viện khác nếu có
     ```
     Sau đó chạy lệnh:
@@ -146,11 +151,7 @@ Nếu bạn muốn chạy ứng dụng này trên máy tính của mình:
     ```
 
 4.  **Chuẩn bị tài liệu PDF:**
-    *   Tạo một thư mục có tên `documents` trong thư mục gốc của dự án.
-    *   Đặt 3 file PDF của bạn vào thư mục `documents` này với tên chính xác như sau:
-        *   `tuyen_duong_sat_do_thi_hcm.pdf`
-        *   `xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf`
-        *   `xe_buyt.pdf`
+   Sẵn ở trong folder của dự án đã có ba tài liệu liên quan đến thông tin của các loại hình giao thông công cộng trong nội thành. Việc tự bổ sung các tài liệu tự tạo sẽ cần có thay đổi đối với logic của code script
 
 ### Thiết lập API Key
 
