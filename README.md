@@ -13,9 +13,6 @@ Chatbot sử dụng sức mạnh của Google Gemini API để hiểu câu hỏi
 
 Ứng dụng được triển khai qua Streamlit Cloud Community. Rate limit hiện tại của Gemini Flash 2.0 là 15 requests mỗi phút, 1 triệu token mỗi phút, và 1500 requests mỗi ngày, khá thoải mái để người dùng cá nhân hỏi đáp với riêng API key cá nhân được lấy từ https://aistudio.google.com/app/apikey
 
-![image](https://github.com/user-attachments/assets/f5473cfa-e4f3-4891-afbd-6fbca10dad60)
-
-
 ## Mục lục
 
 *   [Tính năng nổi bật](#tính-năng-nổi-bật)
@@ -79,6 +76,9 @@ Nó giống như một chiếc chìa khóa riêng mà Google cung cấp cho bạ
 **Lưu ý quan trọng:**
 *   **Bảo mật API Key:** Hãy giữ API Key của bạn cẩn thận, không chia sẻ công khai. Việc sử dụng API có thể phát sinh chi phí tùy theo chính sách của Google.
 *   **Chỉ cần nhập một lần:** Sau khi lưu thành công, API Key sẽ được nhớ cho các lần sử dụng sau trên cùng trình duyệt/máy tính đó (thông qua file `gemini_api_key.json` được tạo trong thư mục của ứng dụng).
+
+![image](https://github.com/user-attachments/assets/f5473cfa-e4f3-4891-afbd-6fbca10dad60)
+
 
 ### Tạo và Quản lý Phiên trò chuyện
 
