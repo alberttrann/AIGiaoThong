@@ -11,7 +11,10 @@ Chào mừng bạn đến với Chatbot Giao Thông Công Cộng TP.HCM! Đây l
 
 Chatbot sử dụng sức mạnh của Google Gemini API để hiểu câu hỏi của bạn và cung cấp câu trả lời dựa trên nội dung từ các tài liệu chuyên đề về giao thông công cộng, cũng như khả năng tìm kiếm thông tin cập nhật trên Google khi cần thiết. Để trải nghiệm, vui lòng truy cập vào web Streamlit này: https://chatbotgtcchcm.streamlit.app/
 
-Ứng dụng được triển khai qua Streamlit Cloud Community. Rate limit hiện tại của Gemini Flash 2.0 là 15 requests mỗi phút, 1 triệu token mỗi phút, và 1500 requests mỗi ngày, khá thoải mái để người dùng cá nhân hỏi đáp với riêng API key cá nhân được lấy từ aistudio.google.com
+Ứng dụng được triển khai qua Streamlit Cloud Community. Rate limit hiện tại của Gemini Flash 2.0 là 15 requests mỗi phút, 1 triệu token mỗi phút, và 1500 requests mỗi ngày, khá thoải mái để người dùng cá nhân hỏi đáp với riêng API key cá nhân được lấy từ https:/[/aistudio.google.com](https://aistudio.google.com/app/apikey)
+
+![image](https://github.com/user-attachments/assets/f5473cfa-e4f3-4891-afbd-6fbca10dad60)
+
 
 ## Mục lục
 
