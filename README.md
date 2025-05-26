@@ -89,6 +89,9 @@ Chatbot cho phép bạn có nhiều cuộc trò chuyện riêng biệt, giúp b�
 *   **Đổi tên phiên:** Nhấn vào biểu tượng **"✏️"** bên cạnh tên phiên bạn muốn đổi. Một ô nhập liệu sẽ xuất hiện để bạn nhập tên mới và nhấn "Lưu".
 *   **Xóa phiên:** Nhấn vào biểu tượng **"🗑️"** bên cạnh tên phiên bạn muốn xóa. **Lưu ý:** Hành động này sẽ xóa toàn bộ lịch sử của phiên đó và không thể hoàn tác.
 
+![image](https://github.com/user-attachments/assets/6427a970-a4df-40b6-8daa-af83feae1f61)
+
+
 ### Đặt câu hỏi cho Chatbot
 
 1.  Đảm bảo bạn đã chọn hoặc tạo một phiên trò chuyện.
