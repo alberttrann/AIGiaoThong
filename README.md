@@ -5,6 +5,9 @@ Chào mừng bạn đến với Chatbot Giao Thông Công Cộng TP.HCM! Đây l
 1.  **Tuyến đường sắt đô thị (Metro)**
 2.  **Xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông**
 3.  **Xe buýt truyền thống**
+4.  **Các kênh phương tiện chính thức để người dân tham khảo về phương tiện công cộng**
+
+Đây là sản phẩm công nghệ dự thi cuộc thi "Thiết kế sản phẩm tuyên truyền về An toàn giao thông" theo nội dung: "Ứng dụng chuyển đổi số và tăng cường trí tuệ nhân tạo trong việc tuyên truyền về xây dựng văn hoá giao thông an toàn; tuyên truyền về sử dụng năng lượng xanh trong tham gia giao thông". 
 
 Chatbot sử dụng sức mạnh của Google Gemini API để hiểu câu hỏi của bạn và cung cấp câu trả lời dựa trên nội dung từ các tài liệu chuyên đề về giao thông công cộng, cũng như khả năng tìm kiếm thông tin cập nhật trên Google khi cần thiết. Để trải nghiệm, vui lòng truy cập vào web Streamlit này: https://chatbotgtcchcm.streamlit.app/
 
