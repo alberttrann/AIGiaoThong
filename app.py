@@ -333,7 +333,7 @@ with st.sidebar:
             else: 
                 st.warning("Vui lòng nhập API Key.")
 
-st.title("Chatbot GTCC TP.HCM (Gemini API)")
+st.title("Chatbot Giao Thông Công Cộng TP.HCM")
 current_session_name = "Chưa chọn phiên"
 if st.session_state.current_session_id:
     cs_info = next((s for s in st.session_state.sessions_list if s["id"] == st.session_state.current_session_id), None)
