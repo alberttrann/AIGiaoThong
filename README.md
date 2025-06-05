@@ -46,7 +46,7 @@ Thỉnh thoảng sẽ có thông báo lỗi 503 như thế này, nhưng đây l�
     *   Lưu trữ lịch sử hội thoại cho từng phiên.
     *   Đổi tên và xóa các phiên trò chuyện.
     *   Lịch sử được lưu trữ bền vững ngay cả khi bạn đóng trình duyệt hoặc khởi động lại ứng dụng.
-*   **Đính kèm tài liệu tự động:** Tự động đính kèm 3 tài liệu PDF nền tảng về GTCC TP.HCM cho Gemini xử lý ở đầu mỗi phiên trò chuyện mới.
+*   **Đính kèm tài liệu tự động:** Tự động đính kèm 3 tài liệu PDF nền tảng về GTCC TP.HCM cho Gemini xử lý ở đầu mỗi phiên trò chuyện mới. Đây là cách tiếp cận sử dụng CAG(Cached Augemnted Generation) thay vì RAG (Retrieval Augmented Generation)
 *   **Thông báo trạng thái:** Hiển thị các thông báo về quá trình xử lý, upload file, v.v.
 
 ## Hướng dẫn sử dụng cho Người dùng
