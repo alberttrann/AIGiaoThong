@@ -1,3 +1,10 @@
 streamlit
 google-genai
 google-api-core
+google-auth-oauthlib>=1.2.0
+google-auth>=2.28.0
+google-api-core>=2.17.0
+requests>=2.31.0
+SQLite3>=3.35.0
+python-dotenv>=1.0.0
+pathlib>=1.0.1
