@@ -367,7 +367,7 @@ def init_google_auth():
     flow = Flow.from_client_config(
         CLIENT_CONFIG,
         scopes=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
-        redirect_uri="http://localhost:8501"
+        redirect_uri="https://chatbotgtcchcm.streamlit.app/"
     )
     return flow
 
