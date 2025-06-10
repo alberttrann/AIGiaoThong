@@ -218,16 +218,19 @@ your-chatbot-project/
 │   ├── xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf
 │   └── xe_buyt.pdf
 ├── chat_sessions.db           # File database SQLite lưu trữ lịch sử trò chuyện (tự động tạo khi dự án được khởi chạy)
-├── gemini_api_key.json        # File lưu API key của Gemini (tự động tạo nếu api key được nhập qua giao diện UI)
 ├── requirements.txt           # File liệt kê các thư viện Python cần thiết
 └── README.md                  # File hướng dẫn này
 ```
 
-## Đóng góp
+## MỚI: Dự án đã được bổ sung thêm tính năng đăng nhập xác thực qua Google:
 
-Nếu bạn muốn đóng góp cho dự án này, vui lòng fork repository, tạo một nhánh mới cho tính năng hoặc bản vá lỗi của bạn, và sau đó tạo một Pull Request.
+![image](https://github.com/user-attachments/assets/21b5459d-d5cd-474b-8e34-2e275d120405)
 
-# Một số hình ảnh của dự án:
+
+![image](https://github.com/user-attachments/assets/7c9c6760-72c9-45cd-b970-cfd67eef0171)
+
+
+## Một số hình ảnh của dự án:
 
 ![Screenshot 2025-05-26 115814](https://github.com/user-attachments/assets/dd5f4a21-baaa-4ce9-a0a8-9a64ba59ac6b)
 
