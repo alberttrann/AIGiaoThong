@@ -6,6 +6,10 @@ from pathlib import Path
 import sqlite3 
 import uuid 
 import time 
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
+from google.auth.transport.requests import Request
+import pickle
 
 from google import genai as google_genai_sdk 
 from google.genai import types as google_genai_types
@@ -16,8 +20,35 @@ DOC_DIR = Path("documents")
 PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.pdf", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf", "xe_buyt.pdf"]
 GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
 DATABASE_PATH = Path("chat_sessions.db") 
+GOOGLE_OAUTH_CONFIG = Path("google_oauth_config.json")
 
-GEMINI_MODEL_ID = "gemini-2.0-flash" 
+# --- OAuth Configuration ---
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development
+
+# Get OAuth config from secrets in production, fallback to file in development
+CLIENT_CONFIG = None
+try:
+    CLIENT_CONFIG = {
+        "web": {
+            "client_id": st.secrets["oauth"]["client_id"],
+            "client_secret": st.secrets["oauth"]["client_secret"],
+            "auth_uri": st.secrets["oauth"]["auth_uri"],
+            "token_uri": st.secrets["oauth"]["token_uri"],
+            "redirect_uris": [st.secrets["oauth"]["redirect_uri"]]
+        }
+    }
+except Exception:
+    # Fallback to file in development
+    if GOOGLE_OAUTH_CONFIG.exists():
+        CLIENT_CONFIG = json.loads(GOOGLE_OAUTH_CONFIG.read_text())
+
+# --- Configuration ---
+DOC_DIR = Path("documents") 
+PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.pdf", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf", "xe_buyt.pdf"]
+GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
+DATABASE_PATH = Path("chat_sessions.db") 
+
+GEMINI_MODEL_ID = "gemini-2.0-flash" # Sticking to user's specified model ID
 
 GEMINI_CLIENT = None
 UPLOADED_FILES_CACHE = {} 
@@ -26,11 +57,26 @@ UPLOADED_FILES_CACHE = {}
 def init_db():
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
+    # Add user table with api_key column
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS users (
+            email TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            picture TEXT,
+            created_at INTEGER NOT NULL,
+            gemini_api_key TEXT
+        )
+    ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS sessions (
-            id TEXT PRIMARY KEY, name TEXT NOT NULL,
-            created_at INTEGER NOT NULL, last_updated_at INTEGER NOT NULL,
-            pdfs_uploaded INTEGER DEFAULT 0 ) ''')
+            id TEXT PRIMARY KEY, 
+            name TEXT NOT NULL,
+            created_at INTEGER NOT NULL, 
+            last_updated_at INTEGER NOT NULL,
+            pdfs_uploaded INTEGER DEFAULT 0,
+            user_email TEXT,
+            FOREIGN KEY (user_email) REFERENCES users(email)
+        ) ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS messages (
             id TEXT PRIMARY KEY, session_id TEXT NOT NULL, role TEXT NOT NULL,
@@ -41,20 +87,44 @@ def init_db():
     conn.commit(); conn.close()
 
 def create_new_session_db(session_name_prefix="Trò chuyện mới"):
+    if not st.session_state.user_info:
+        st.error("User not authenticated")
+        return None, None
+    
+    user_email = st.session_state.user_info.get("email")
+    if not user_email:
+        st.error("User email not found")
+        return None, None
+    
     session_id = str(uuid.uuid4()); conn = sqlite3.connect(DATABASE_PATH); cursor = conn.cursor()
     count = 0; session_name = f"{session_name_prefix}"
     while True:
-        cursor.execute("SELECT COUNT(*) FROM sessions WHERE name = ?", (session_name,))
+        cursor.execute("SELECT COUNT(*) FROM sessions WHERE name = ? AND user_email = ?", 
+                      (session_name, user_email))
         if cursor.fetchone()[0] == 0: break
         count += 1; session_name = f"{session_name_prefix} ({count})"
     current_time = int(time.time())
-    cursor.execute("INSERT INTO sessions (id, name, created_at, last_updated_at, pdfs_uploaded) VALUES (?, ?, ?, ?, ?)",
-                   (session_id, session_name, current_time, current_time, 0))
+    cursor.execute("""
+        INSERT INTO sessions (id, name, created_at, last_updated_at, pdfs_uploaded, user_email) 
+        VALUES (?, ?, ?, ?, ?, ?)""",
+        (session_id, session_name, current_time, current_time, 0, user_email))
     conn.commit(); conn.close(); return session_id, session_name
 
 def get_sessions_db():
+    if not st.session_state.user_info:
+        return []
+    
+    user_email = st.session_state.user_info.get("email")
+    if not user_email:
+        return []
+    
     conn = sqlite3.connect(DATABASE_PATH); cursor = conn.cursor()
-    cursor.execute("SELECT id, name, last_updated_at, pdfs_uploaded FROM sessions ORDER BY last_updated_at DESC")
+    cursor.execute("""
+        SELECT id, name, last_updated_at, pdfs_uploaded 
+        FROM sessions 
+        WHERE user_email = ? 
+        ORDER BY last_updated_at DESC""", 
+        (user_email,))
     sessions = [{"id": r[0], "name": r[1], "last_updated_at": r[2], "pdfs_uploaded": r[3]} for r in cursor.fetchall()]
     conn.close(); return sessions
 
@@ -102,12 +172,38 @@ def delete_session_db(session_id):
 init_db()
 
 def load_api_key():
-    if GEMINI_API_KEY_FILE.exists():
-        with open(GEMINI_API_KEY_FILE, 'r') as f: data = json.load(f); return data.get("GEMINI_API_KEY")
-    return os.environ.get("GEMINI_API_KEY")
+    if not st.session_state.user_info:
+        return None
+        
+    user_email = st.session_state.user_info.get('email')
+    if not user_email:
+        return None
+        
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT gemini_api_key FROM users WHERE email = ?", (user_email,))
+    result = cursor.fetchone()
+    conn.close()
+    
+    if result and result[0]:
+        return result[0]
+    return None
 
 def save_api_key(api_key_value):
-    with open(GEMINI_API_KEY_FILE, 'w') as f: json.dump({"GEMINI_API_KEY": api_key_value}, f)
+    if not st.session_state.user_info:
+        return False
+        
+    user_email = st.session_state.user_info.get('email')
+    if not user_email:
+        return False
+        
+    conn = sqlite3.connect(DATABASE_PATH)
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET gemini_api_key = ? WHERE email = ?", 
+                  (api_key_value, user_email))
+    conn.commit()
+    conn.close()
+    return True
 
 @st.cache_resource
 def get_gemini_client(api_key_value):
@@ -221,8 +317,8 @@ def generate_gemini_response_stream(client, user_prompt_text, current_session_id
             model=model_to_use, contents=gemini_contents, config=generation_config_for_stream,
         )
         placeholder = st.empty()
-        for chunk in response_stream: 
-            if hasattr(chunk, 'text') and chunk.text: 
+        for chunk in response_stream: # chunk is a GenerateContentResponse
+            if hasattr(chunk, 'text') and chunk.text: # Check if chunk.text exists and is not empty
                 full_response_text += chunk.text
                 placeholder.markdown(full_response_text + "▌")
             
@@ -262,17 +358,157 @@ def generate_gemini_response_stream(client, user_prompt_text, current_session_id
         st.error(f"Lỗi không xác định khi gọi Gemini API: {e}")
         return f"[Lỗi Gemini: {e}]", None
 
+# --- Authentication Functions ---
+def init_google_auth():
+    if not CLIENT_CONFIG:
+        st.error("Google OAuth configuration not found. Please set up google_oauth_config.json")
+        return None
+    
+    flow = Flow.from_client_config(
+        CLIENT_CONFIG,
+        scopes=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
+        redirect_uri="http://localhost:8501"
+    )
+    return flow
+
+def get_user_info(creds_dict=None):
+    import google.auth.transport.requests
+    import requests
+    
+    try:
+        if creds_dict:
+            credentials = Credentials(
+                token=creds_dict.get('token'),
+                refresh_token=creds_dict.get('refresh_token'),
+                token_uri=creds_dict.get('token_uri'),
+                client_id=creds_dict.get('client_id'),
+                client_secret=creds_dict.get('client_secret'),
+                scopes=creds_dict.get('scopes')
+            )
+        else:
+            credentials = st.session_state.user_credentials
+            
+        if not credentials or not credentials.valid:
+            if credentials and credentials.expired and credentials.refresh_token:
+                request = google.auth.transport.requests.Request()
+                credentials.refresh(request)
+                # Update stored credentials if they were refreshed
+                if hasattr(st.session_state, 'user_credentials'):
+                    st.session_state.user_credentials = credentials
+        
+        userinfo_endpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
+        response = requests.get(
+            userinfo_endpoint,
+            headers={'Authorization': f'Bearer {credentials.token}'}
+        )
+        if response.ok:
+            return response.json()
+        else:
+            st.error("Failed to get user info")
+            return None
+    except Exception as e:
+        st.error(f"Error getting user info: {e}")
+        return None
+
+# --- Initialization and Authentication ---
+def initialize_auth_and_session():
+    # Initialize basic session state
+    if "user_info" not in st.session_state: st.session_state.user_info = None
+    if "user_credentials" not in st.session_state: st.session_state.user_credentials = None
+    if "current_session_id" not in st.session_state: st.session_state.current_session_id = None
+    if "chat_history" not in st.session_state: st.session_state.chat_history = []
+    if "gemini_api_key" not in st.session_state: st.session_state.gemini_api_key = load_api_key()
+
+    # Try to refresh existing credentials if present
+    if st.session_state.user_credentials and not st.session_state.user_info:
+        user_info = get_user_info(st.session_state.user_credentials)
+        if user_info:
+            st.session_state.user_info = user_info
+
+    # Handle authentication if not logged in
+    if not st.session_state.user_info:
+        flow = init_google_auth()
+        if flow:
+            if "code" not in st.query_params:
+                auth_url, _ = flow.authorization_url(prompt='consent')
+                st.markdown(f"""
+                    ### 👋 Welcome to Chatbot GTCC HCM
+                    Please sign in with your Google account to continue.
+                    
+                    [![Login with Google](https://img.shields.io/badge/Login_with_Google-4285F4?style=for-the-badge&logo=google&logoColor=white)]({auth_url})
+                    """)
+                st.stop()
+            else:
+                try:
+                    code = st.query_params["code"]
+                    flow.fetch_token(code=code)
+                    credentials = flow.credentials
+                    st.session_state.user_credentials = credentials
+                    
+                    user_info = get_user_info()
+                    if user_info:
+                        st.session_state.user_info = user_info
+                        # Store user in database
+                        conn = sqlite3.connect(DATABASE_PATH)
+                        cursor = conn.cursor()                        # Only update user info, preserve API key
+                        cursor.execute("""
+                            INSERT INTO users (email, name, picture, created_at, gemini_api_key)
+                            VALUES (?, ?, ?, ?, NULL)
+                            ON CONFLICT(email) DO UPDATE SET
+                                name = excluded.name,
+                                picture = excluded.picture,
+                                created_at = excluded.created_at
+                                -- Intentionally not updating gemini_api_key to preserve it
+                        """, (user_info['email'], user_info['name'], 
+                             user_info.get('picture', ''), int(time.time())))
+                        conn.commit()
+
+                        # Load the API key for this user
+                        cursor.execute("SELECT gemini_api_key FROM users WHERE email = ?", (user_info['email'],))
+                        api_key_row = cursor.fetchone()
+                        if api_key_row and api_key_row[0]:
+                            st.session_state.gemini_api_key = api_key_row[0]
+                        
+                        conn.close()
+                        st.rerun()
+                except Exception as e:
+                    st.error(f"Error during authentication: {e}")
+                    st.session_state.user_credentials = None
+                    st.session_state.user_info = None
+                    st.stop()
+
+    # After authentication, load sessions
+    if "sessions_list" not in st.session_state:
+        st.session_state.sessions_list = get_sessions_db()
+
+# Initialize database tables
+init_db()
+
 # --- Streamlit UI ---
 st.set_page_config(page_title="Chatbot GTCC HCM (Gemini)", layout="wide")
-if "current_session_id" not in st.session_state: st.session_state.current_session_id = None
-if "chat_history" not in st.session_state: st.session_state.chat_history = []
-if "sessions_list" not in st.session_state: st.session_state.sessions_list = get_sessions_db()
-if "gemini_api_key" not in st.session_state: st.session_state.gemini_api_key = load_api_key()
+initialize_auth_and_session()
 
 if st.session_state.gemini_api_key and GEMINI_CLIENT is None:
     GEMINI_CLIENT = get_gemini_client(st.session_state.gemini_api_key)
 
 with st.sidebar:
+    if st.session_state.user_info:
+        col1, col2 = st.columns([0.7, 0.3])
+        with col1:
+            st.write(f"👤 Xin chào, {st.session_state.user_info.get('name', 'User')}")
+        with col2:
+            if st.button("Đăng xuất", key="logout_button"):
+                # Clear query parameters first
+                st.query_params.clear()
+                # Clear all session state
+                for key in ['user_credentials', 'user_info', 'current_session_id', 'chat_history', 'sessions_list', 'gemini_api_key']:
+                    if key in st.session_state:
+                        del st.session_state[key]
+                st.rerun()
+        if st.session_state.user_info.get('picture'):
+            st.image(st.session_state.user_info['picture'], width=50)
+        st.divider()
+        
     st.header("Phiên trò chuyện")
     if st.button("➕ Trò chuyện mới", use_container_width=True):
         new_id, _ = create_new_session_db(); st.session_state.current_session_id = new_id
@@ -317,23 +553,30 @@ with st.sidebar:
                     st.warning("Tên không được để trống.")
     st.divider()
     st.header("Cài đặt API Gemini")
-    if st.session_state.gemini_api_key:
-        st.success("Đã có Gemini API Key.")
-        if st.button("Thay đổi/Xóa API Key"): 
-            st.session_state.gemini_api_key = None; save_api_key(None); 
-            GEMINI_CLIENT = None; st.rerun()
-    else:
-        new_key = st.text_input("Nhập Gemini API Key:", type="password", key="new_gem_key_input")
-        if st.button("Lưu API Key", key="save_gem_key_btn"):
-            if new_key: 
-                client_test = get_gemini_client(new_key) # Test key
-                if client_test: 
-                    st.session_state.gemini_api_key = new_key; save_api_key(new_key); 
-                    GEMINI_CLIENT = client_test; st.success("Đã lưu!"); st.rerun()
-            else: 
-                st.warning("Vui lòng nhập API Key.")
+    if st.session_state.user_info:
+        if st.session_state.gemini_api_key:
+            st.success(f"API Key được cấu hình cho tài khoản {st.session_state.user_info.get('email')}")
+            if st.button("Thay đổi/Xóa API Key"): 
+                st.session_state.gemini_api_key = None
+                save_api_key(None)
+                GEMINI_CLIENT = None
+                st.rerun()
+        else:
+            new_key = st.text_input("Nhập Gemini API Key cho tài khoản của bạn:", 
+                                  type="password", key="new_gem_key_input")
+            if st.button("Lưu API Key", key="save_gem_key_btn"):
+                if new_key: 
+                    client_test = get_gemini_client(new_key) # Test key
+                    if client_test: 
+                        if save_api_key(new_key):
+                            st.session_state.gemini_api_key = new_key
+                            GEMINI_CLIENT = client_test
+                            st.success(f"Đã lưu API Key cho tài khoản {st.session_state.user_info.get('email')}!")
+                            st.rerun()
+                else: 
+                    st.warning("Vui lòng nhập API Key.")
 
-st.title("Chatbot Giao Thông Công Cộng TP.HCM")
+st.title("Chatbot GTCC TP.HCM (Gemini API)")
 current_session_name = "Chưa chọn phiên"
 if st.session_state.current_session_id:
     cs_info = next((s for s in st.session_state.sessions_list if s["id"] == st.session_state.current_session_id), None)
@@ -363,7 +606,7 @@ if user_prompt and st.session_state.current_session_id:
         with st.chat_message("assistant"):
             full_response, grounding_meta_dict = generate_gemini_response_stream(
                 GEMINI_CLIENT, user_prompt, st.session_state.current_session_id,
-                st.session_state.chat_history[:-1] 
+                st.session_state.chat_history[:-1] # Pass history *before* this user's current message
             )
             assistant_msg_obj = {"role": "assistant", "content": full_response}
             if grounding_meta_dict: assistant_msg_obj["gemini_grounding_metadata"] = grounding_meta_dict
