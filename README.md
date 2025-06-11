@@ -48,6 +48,12 @@ Thỉnh thoảng sẽ có thông báo lỗi 503 như thế này, nhưng đây l�
     *   Lịch sử được lưu trữ bền vững ngay cả khi bạn đóng trình duyệt hoặc khởi động lại ứng dụng.
 *   **Đính kèm tài liệu tự động:** Tự động đính kèm 3 tài liệu PDF nền tảng về GTCC TP.HCM cho Gemini xử lý ở đầu mỗi phiên trò chuyện mới. Đây là cách tiếp cận sử dụng CAG(Cached Augemented Generation) thay vì RAG (Retrieval Augmented Generation)
 *   **Thông báo trạng thái:** Hiển thị các thông báo về quá trình xử lý, upload file, v.v.
+*   **Google OAuth**: Chatbot có hỗ trợ đăng nhập để sử dụng với tài khoản Google
+
+![image](https://github.com/user-attachments/assets/21b5459d-d5cd-474b-8e34-2e275d120405)
+
+
+![image](https://github.com/user-attachments/assets/7c9c6760-72c9-45cd-b970-cfd67eef0171)
 
 ## Hướng dẫn sử dụng cho Người dùng
 
@@ -221,14 +227,6 @@ your-chatbot-project/
 ├── requirements.txt           # File liệt kê các thư viện Python cần thiết
 └── README.md                  # File hướng dẫn này
 ```
-
-## MỚI: Dự án đã được bổ sung thêm tính năng đăng nhập xác thực qua Google:
-
-![image](https://github.com/user-attachments/assets/21b5459d-d5cd-474b-8e34-2e275d120405)
-
-
-![image](https://github.com/user-attachments/assets/7c9c6760-72c9-45cd-b970-cfd67eef0171)
-
 
 ## Một số hình ảnh của dự án:
 
