@@ -432,8 +432,8 @@ def initialize_auth_and_session():
             if "code" not in st.query_params:
                 auth_url, _ = flow.authorization_url(prompt='consent')
                 st.markdown(f"""
-                    ### 👋 Welcome to Chatbot GTCC HCM
-                    Please sign in with your Google account to continue.
+                    ### 👋 Chào Mừng Đến Với Trợ Lý Giao Thông Công Cộng Tp.HCM
+                    Vui lòng đăng nhập để tiếp tục.
                     
                     [![Login with Google](https://img.shields.io/badge/Login_with_Google-4285F4?style=for-the-badge&logo=google&logoColor=white)]({auth_url})
                     """)
@@ -485,7 +485,7 @@ def initialize_auth_and_session():
 init_db()
 
 # --- Streamlit UI ---
-st.set_page_config(page_title="Chatbot GTCC HCM (Gemini)", layout="wide")
+st.set_page_config(page_title="Trợ lý Giao Thông Công Cộng HCM", layout="wide")
 initialize_auth_and_session()
 
 if st.session_state.gemini_api_key and GEMINI_CLIENT is None:
