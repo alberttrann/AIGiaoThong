@@ -5,7 +5,8 @@ Chào mừng bạn đến với Chatbot Giao Thông Công Cộng TP.HCM! Đây l
 1.  **Tuyến đường sắt đô thị (Metro)**
 2.  **Xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông**
 3.  **Xe buýt truyền thống**
-4.  **Các kênh phương tiện chính thức để người dân tham khảo về phương tiện công cộng**
+4.  **Bến phà, Bến Đò**
+5.  **Các kênh phương tiện chính thức để người dân tham khảo về phương tiện công cộng**
 
 Đây là sản phẩm công nghệ dự thi cuộc thi "Thiết kế sản phẩm tuyên truyền về An toàn giao thông" theo nội dung: "Ứng dụng chuyển đổi số và tăng cường trí tuệ nhân tạo trong việc tuyên truyền về xây dựng văn hoá giao thông an toàn; tuyên truyền về sử dụng năng lượng xanh trong tham gia giao thông". 
 
@@ -183,7 +184,7 @@ Nếu bạn muốn chạy ứng dụng này trên máy tính của mình:
     ```
 
 4.  **Chuẩn bị tài liệu PDF:**
-   Sẵn ở trong folder của dự án đã có ba tài liệu liên quan đến thông tin của các loại hình giao thông công cộng trong nội thành, được tạo ra từ tính năng Deep Research(Nghiên cứu sâu) với Gemini 2.5 Pro(Preview). Việc tự bổ sung các tài liệu tự tạo sẽ cần có thay đổi đối với logic của code script
+   Sẵn ở trong folder của dự án đã có các tài liệu liên quan đến thông tin của các loại hình giao thông công cộng trong nội thành, được tạo ra từ tính năng Deep Research(Nghiên cứu sâu) với Gemini 2.5 Pro(Preview) và từ các tài liệu chính thức từ phía các ban quản lý các loại hình giao thông công cộng. Việc tự bổ sung các tài liệu tự tạo sẽ cần có thay đổi đối với logic của code script
 
 ### Thiết lập API Key
 
