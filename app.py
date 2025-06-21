@@ -437,6 +437,24 @@ def initialize_auth_and_session():
                     
                     [![Login with Google](https://img.shields.io/badge/Login_with_Google-4285F4?style=for-the-badge&logo=google&logoColor=white)]({auth_url})
                     """)
+
+                st.subheader("Hướng dẫn thiết lập sau khi đăng nhập")
+
+                st.image("images/api_key.png", caption="Giao diện nhập API Key (minh họa)") 
+
+                st.image("images/api_key1.png", caption="Giao diện tạo API Key trên Google AI Studio (minh họa)") 
+
+                st.markdown("""
+                    _(Lưu ý: Các ảnh trên chỉ mang tính minh họa giao diện cần thao tác sau khi đăng nhập.)_
+
+                    Sau khi đăng nhập thành công, bạn sẽ cần cung cấp Gemini API Key để sử dụng chatbot. 
+                    Vui lòng truy cập vào [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey) để tạo cho mình một API key. 
+                    Nhấn nút "Create API key" để lấy một khoá API mới. 
+                    Nếu được yêu cầu tạo một dự án để chứa khoá API, hãy nhanh chóng tạo và đặt một tên bất kỳ cho dự án (ví dụ: "Chatbot Project"), sau đó bạn sẽ có ngay khoá API. 
+                    
+                    Sao chép khoá API vừa tạo và dán vào ô "Nhập Gemini API Key cho tài khoản của bạn" ở cột bên trái (sidebar) sau khi đăng nhập. 
+                    Nhấn "Lưu API Key", tạo một phiên trò chuyện mới, và bạn đã sẵn sàng sử dụng trợ lý giao thông!
+                    """)
                 st.stop()
             else:
                 try:
