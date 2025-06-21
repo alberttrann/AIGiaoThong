@@ -434,6 +434,7 @@ def initialize_auth_and_session():
                 st.markdown(f"""
                     ### 👋 Chào Mừng Đến Với Trợ Lý Giao Thông Công Cộng Tp.HCM
                     Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông
+                    
                     Vui lòng đăng nhập để tiếp tục.
                     
                     [![Login with Google](https://img.shields.io/badge/Login_with_Google-4285F4?style=for-the-badge&logo=google&logoColor=white)]({auth_url})
