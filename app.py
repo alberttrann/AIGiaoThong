@@ -22,6 +22,10 @@ GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
 DATABASE_PATH = Path("chat_sessions.db") 
 GOOGLE_OAUTH_CONFIG = Path("google_oauth_config.json")
 
+GEMINI_MODEL_ID = "gemini-2.0-flash" # Sticking to user's specified model ID
+GEMINI_CLIENT = None
+UPLOADED_FILES_CACHE = {} 
+
 # --- OAuth Configuration ---
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development
 
@@ -42,16 +46,7 @@ except Exception:
     if GOOGLE_OAUTH_CONFIG.exists():
         CLIENT_CONFIG = json.loads(GOOGLE_OAUTH_CONFIG.read_text())
 
-# --- Configuration ---
-DOC_DIR = Path("documents") 
-PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.pdf", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf", "xe_buyt.pdf"]
-GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
-DATABASE_PATH = Path("chat_sessions.db") 
 
-GEMINI_MODEL_ID = "gemini-2.0-flash" # Sticking to user's specified model ID
-
-GEMINI_CLIENT = None
-UPLOADED_FILES_CACHE = {} 
 
 # --- Database Helper Functions ---
 def init_db():
