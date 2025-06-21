@@ -17,7 +17,7 @@ from google.api_core.exceptions import PermissionDenied, InvalidArgument, NotFou
 
 # --- Configuration ---
 DOC_DIR = Path("documents") 
-PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.pdf", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf", "xe_buyt.pdf", "xe_buyt1.md", "benpha.md"]
+PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.md", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.md", "xe_buyt.md", "xe_buyt1.md", "benpha.md"]
 GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
 DATABASE_PATH = Path("chat_sessions.db") 
 GOOGLE_OAUTH_CONFIG = Path("google_oauth_config.json")
