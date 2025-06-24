@@ -209,6 +209,7 @@ Tuyến Metro số 1 (Bến Thành – Suối Tiên) đã chính thức đi vào
     *   Sau 6 tháng vận hành, tần suất giờ cao điểm có thể được rút ngắn xuống còn 5 phút/chuyến, giờ bình thường 10 phút/chuyến và giờ thấp điểm 15 phút/chuyến, tùy theo lượng khách thực tế.[42]
 *   **Tổng số chuyến mỗi ngày:** Trong giai đoạn đầu, có khoảng 200 chuyến tàu hoạt động mỗi ngày.⁴⁶ Con số này có thể tăng lên 276-300 chuyến/ngày trong các giai đoạn tiếp theo.[46]
 *   **Thời gian di chuyển toàn tuyến:** Hành trình từ ga đầu Bến Thành đến ga cuối Suối Tiên (hoặc ngược lại) mất khoảng 30 phút, bao gồm cả thời gian dừng tại các ga.⁴
+*   **Loại tàu**: 930 chỗ
 
 ### Các loại vé và bảng giá chi tiết
 
