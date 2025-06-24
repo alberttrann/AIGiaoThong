@@ -3,28 +3,29 @@ import os
 import json
 import re
 from pathlib import Path
-import sqlite3 
-import uuid 
-import time 
+import sqlite3
+import uuid
+import time
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from google.auth.transport.requests import Request
 import pickle
 
-from google import genai as google_genai_sdk 
+from google import genai as google_genai_sdk
 from google.genai import types as google_genai_types
 from google.api_core.exceptions import PermissionDenied, InvalidArgument, NotFound, GoogleAPIError
 
 # --- Configuration ---
-DOC_DIR = Path("documents") 
-PDF_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.md", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.md", "xe_buyt.md", "xe_buyt1.md", "benpha.md"]
+DOC_DIR = Path("documents")
+# Renamed list to reflect inclusion of .md files
+GROUNDING_FILENAMES = ["tuyen_duong_sat_do_thi_hcm.md", "xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.md", "xe_buyt.md", "xe_buyt1.md", "benpha.md"]
 GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
-DATABASE_PATH = Path("chat_sessions.db") 
+DATABASE_PATH = Path("chat_sessions.db")
 GOOGLE_OAUTH_CONFIG = Path("google_oauth_config.json")
 
 GEMINI_MODEL_ID = "gemini-2.0-flash" # Sticking to user's specified model ID
 GEMINI_CLIENT = None
-UPLOADED_FILES_CACHE = {} 
+UPLOADED_FILES_CACHE = {}
 
 # --- OAuth Configuration ---
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development
@@ -47,7 +48,6 @@ except Exception:
         CLIENT_CONFIG = json.loads(GOOGLE_OAUTH_CONFIG.read_text())
 
 
-
 # --- Database Helper Functions ---
 def init_db():
     conn = sqlite3.connect(DATABASE_PATH)
@@ -64,11 +64,11 @@ def init_db():
     ''')
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS sessions (
-            id TEXT PRIMARY KEY, 
+            id TEXT PRIMARY KEY,
             name TEXT NOT NULL,
-            created_at INTEGER NOT NULL, 
+            created_at INTEGER NOT NULL,
             last_updated_at INTEGER NOT NULL,
-            pdfs_uploaded INTEGER DEFAULT 0,
+            pdfs_uploaded INTEGER DEFAULT 0, -- Keep name for backward compatibility or rename carefully
             user_email TEXT,
             FOREIGN KEY (user_email) REFERENCES users(email)
         ) ''')
@@ -76,7 +76,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS messages (
             id TEXT PRIMARY KEY, session_id TEXT NOT NULL, role TEXT NOT NULL,
             content TEXT NOT NULL, timestamp INTEGER NOT NULL,
-            gemini_grounding_metadata_json TEXT, 
+            gemini_grounding_metadata_json TEXT,
             FOREIGN KEY (session_id) REFERENCES sessions (id) ON DELETE CASCADE ) ''')
     cursor.execute('''CREATE INDEX IF NOT EXISTS idx_messages_session_id_timestamp ON messages (session_id, timestamp);''')
     conn.commit(); conn.close()
@@ -85,40 +85,40 @@ def create_new_session_db(session_name_prefix="Trò chuyện mới"):
     if not st.session_state.user_info:
         st.error("User not authenticated")
         return None, None
-    
+
     user_email = st.session_state.user_info.get("email")
     if not user_email:
         st.error("User email not found")
         return None, None
-    
+
     session_id = str(uuid.uuid4()); conn = sqlite3.connect(DATABASE_PATH); cursor = conn.cursor()
     count = 0; session_name = f"{session_name_prefix}"
     while True:
-        cursor.execute("SELECT COUNT(*) FROM sessions WHERE name = ? AND user_email = ?", 
+        cursor.execute("SELECT COUNT(*) FROM sessions WHERE name = ? AND user_email = ?",
                       (session_name, user_email))
         if cursor.fetchone()[0] == 0: break
         count += 1; session_name = f"{session_name_prefix} ({count})"
     current_time = int(time.time())
     cursor.execute("""
-        INSERT INTO sessions (id, name, created_at, last_updated_at, pdfs_uploaded, user_email) 
+        INSERT INTO sessions (id, name, created_at, last_updated_at, pdfs_uploaded, user_email)
         VALUES (?, ?, ?, ?, ?, ?)""",
-        (session_id, session_name, current_time, current_time, 0, user_email))
+        (session_id, session_name, current_time, current_time, 0, user_email)) # pdfs_uploaded default to 0
     conn.commit(); conn.close(); return session_id, session_name
 
 def get_sessions_db():
     if not st.session_state.user_info:
         return []
-    
+
     user_email = st.session_state.user_info.get("email")
     if not user_email:
         return []
-    
+
     conn = sqlite3.connect(DATABASE_PATH); cursor = conn.cursor()
     cursor.execute("""
-        SELECT id, name, last_updated_at, pdfs_uploaded 
-        FROM sessions 
-        WHERE user_email = ? 
-        ORDER BY last_updated_at DESC""", 
+        SELECT id, name, last_updated_at, pdfs_uploaded
+        FROM sessions
+        WHERE user_email = ?
+        ORDER BY last_updated_at DESC""",
         (user_email,))
     sessions = [{"id": r[0], "name": r[1], "last_updated_at": r[2], "pdfs_uploaded": r[3]} for r in cursor.fetchall()]
     conn.close(); return sessions
@@ -130,7 +130,7 @@ def load_messages_db(session_id):
     for row in cursor.fetchall():
         msg = {"role": row[0], "content": row[1]}
         if row[2]: # gemini_grounding_metadata_json
-            try: msg["gemini_grounding_metadata"] = json.loads(row[2]) 
+            try: msg["gemini_grounding_metadata"] = json.loads(row[2])
             except json.JSONDecodeError: msg["gemini_grounding_metadata_error"] = "Lỗi parse metadata"
         messages.append(msg)
     conn.close(); return messages
@@ -147,7 +147,8 @@ def save_message_db(session_id, role, content, grounding_metadata_obj=None):
     cursor.execute("UPDATE sessions SET last_updated_at = ? WHERE id = ?", (current_time, session_id))
     conn.commit(); conn.close()
 
-def set_pdfs_uploaded_for_session_db(session_id):
+# Function to mark files as uploaded for a session
+def mark_files_uploaded_for_session_db(session_id):
     conn = sqlite3.connect(DATABASE_PATH); cursor = conn.cursor()
     cursor.execute("UPDATE sessions SET pdfs_uploaded = 1, last_updated_at = ? WHERE id = ?", (int(time.time()), session_id))
     conn.commit(); conn.close()
@@ -169,17 +170,17 @@ init_db()
 def load_api_key():
     if not st.session_state.user_info:
         return None
-        
+
     user_email = st.session_state.user_info.get('email')
     if not user_email:
         return None
-        
+
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT gemini_api_key FROM users WHERE email = ?", (user_email,))
     result = cursor.fetchone()
     conn.close()
-    
+
     if result and result[0]:
         return result[0]
     return None
@@ -187,14 +188,14 @@ def load_api_key():
 def save_api_key(api_key_value):
     if not st.session_state.user_info:
         return False
-        
+
     user_email = st.session_state.user_info.get('email')
     if not user_email:
         return False
-        
+
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE users SET gemini_api_key = ? WHERE email = ?", 
+    cursor.execute("UPDATE users SET gemini_api_key = ? WHERE email = ?",
                   (api_key_value, user_email))
     conn.commit()
     conn.close()
@@ -204,46 +205,55 @@ def save_api_key(api_key_value):
 def get_gemini_client(api_key_value):
     try:
         client = google_genai_sdk.Client(api_key=api_key_value)
-        client.models.list() 
+        # Test client connectivity and API key validity
+        client.models.list()
         st.success("Gemini Client đã khởi tạo thành công!")
         return client
     except Exception as e:
         st.error(f"Lỗi khởi tạo Gemini Client: {e}. Kiểm tra API Key.")
         return None
 
-def upload_files_to_gemini(client, pdf_filenames_list, current_session_id):
+# Updated function to use the general GROUNDING_FILENAMES
+def upload_files_to_gemini(client, filenames_list, current_session_id):
     if current_session_id in UPLOADED_FILES_CACHE and UPLOADED_FILES_CACHE[current_session_id]:
         st.info(f"Sử dụng file đã upload cho session {current_session_id} từ cache.")
         return UPLOADED_FILES_CACHE[current_session_id]
 
     uploaded_file_objects = []
-    st.write("Đang upload tài liệu PDF lên Gemini...")
-    for filename in pdf_filenames_list:
+    st.write("Đang upload tài liệu lên Gemini để hỗ trợ trả lời...")
+    for filename in filenames_list:
         file_path_obj = DOC_DIR / filename
         if file_path_obj.exists():
             try:
+                # Determine MIME type based on file extension
+                mime_type = "application/pdf" if filename.lower().endswith(".pdf") else "text/markdown" if filename.lower().endswith(".md") else "application/octet-stream" # Default
                 with st.spinner(f"Uploading {filename}..."):
-                    st.write(f"Đang upload: {file_path_obj.name}")
-                    gemini_file_obj = client.files.upload(file=file_path_obj) 
+                    st.write(f"Đang upload: {file_path_obj.name} (Type: {mime_type})")
+                    # Pass mime_type to the upload method
+                    gemini_file_obj = client.files.upload(file=file_path_obj, mime_type=mime_type)
                     uploaded_file_objects.append(gemini_file_obj)
                     st.success(f"Đã upload: {filename} (ID: {gemini_file_obj.name})")
             except Exception as e:
                 st.error(f"Lỗi upload file {filename}: {e}")
-                st.error(f"Chi tiết lỗi: {type(e).__name__} - {e}")
+                # Attempt to give more specific error if available
+                error_details = getattr(e, 'message', str(e))
+                st.error(f"Chi tiết lỗi: {type(e).__name__} - {error_details}")
         else:
             st.error(f"Không tìm thấy file: {file_path_obj}")
-    
+
     if uploaded_file_objects:
         UPLOADED_FILES_CACHE[current_session_id] = uploaded_file_objects
-        set_pdfs_uploaded_for_session_db(current_session_id)
+        # Use the updated function name if you changed it, otherwise keep as is
+        mark_files_uploaded_for_session_db(current_session_id)
     else:
-        st.warning("Không có file PDF nào được upload thành công.")
+        st.warning("Không có tài liệu nào được upload thành công.")
     return uploaded_file_objects
+
 
 def generate_gemini_response_stream(client, user_prompt_text, current_session_id, existing_chat_history):
     global UPLOADED_FILES_CACHE
-    model_to_use = GEMINI_MODEL_ID 
-    
+    model_to_use = GEMINI_MODEL_ID
+
     system_instruction_string = """
 Bạn là Trợ lý Giao Thông Công Cộng Thành phố Hồ Chí Minh.
 
@@ -314,66 +324,66 @@ Chào bạn, từ Chợ Phú Lâm (Quận 6) đến Đại học FPT ở Khu Cô
 
 Bạn có thể cân nhắc ưu tiên của mình (chi phí, thời gian, sự tiện lợi, đóng góp cho môi trường) để chọn lựa chọn phù hợp nhất cho chuyến đi của mình. Chúc bạn có chuyến đi thuận lợi!
 """
-    
+
     system_parts_for_config = [google_genai_types.Part.from_text(text=system_instruction_string)]
 
     gemini_contents = []
     for msg in existing_chat_history:
         role = "user" if msg["role"] == "user" else "model"
-        msg_content_str = str(msg.get("content", "")) 
+        msg_content_str = str(msg.get("content", ""))
         gemini_contents.append(google_genai_types.Content(role=role, parts=[google_genai_types.Part.from_text(text=msg_content_str)]))
 
     current_user_parts = [google_genai_types.Part.from_text(text=user_prompt_text)]
 
     session_info = next((s for s in st.session_state.get("sessions_list", []) if s["id"] == current_session_id), None)
-    pdfs_already_uploaded_for_session = False
-    if session_info: pdfs_already_uploaded_for_session = session_info.get("pdfs_uploaded", 0) == 1
-    else:
-        conn = sqlite3.connect(DATABASE_PATH); cursor = conn.cursor()
-        cursor.execute("SELECT pdfs_uploaded FROM sessions WHERE id = ?", (current_session_id,))
-        db_row = cursor.fetchone(); conn.close()
-        if db_row: pdfs_already_uploaded_for_session = db_row[0] == 1
-    
-    needs_pdf_upload_this_turn = not pdfs_already_uploaded_for_session
+    # Check if files were already marked as uploaded for this session
+    files_already_uploaded_for_session = False
+    if session_info: files_already_uploaded_for_session = session_info.get("pdfs_uploaded", 0) == 1 # Note: "pdfs_uploaded" might be a misnomer now
 
-    if needs_pdf_upload_this_turn:
-        st.info("Tin nhắn đầu/file chưa up cho phiên này. Đính kèm PDFs...")
-        pdf_file_objects_for_this_turn = [] 
+    needs_file_upload_this_turn = not files_already_uploaded_for_session
+
+    if needs_file_upload_this_turn:
+        st.info("Tin nhắn đầu/tài liệu chưa up cho phiên này. Đính kèm tài liệu...")
+        document_file_objects_for_this_turn = []
+        # Check cache first before attempting upload
         if current_session_id not in UPLOADED_FILES_CACHE or not UPLOADED_FILES_CACHE[current_session_id]:
-            pdf_file_objects_for_this_turn = upload_files_to_gemini(client, PDF_FILENAMES, current_session_id)
+            # Use the general GROUNDING_FILENAMES list
+            document_file_objects_for_this_turn = upload_files_to_gemini(client, GROUNDING_FILENAMES, current_session_id)
         else:
-            pdf_file_objects_for_this_turn = UPLOADED_FILES_CACHE[current_session_id]; st.info("Dùng PDF cache cho Gemini.")
-        
-        if pdf_file_objects_for_this_turn:
-            for file_obj in pdf_file_objects_for_this_turn:
+            document_file_objects_for_this_turn = UPLOADED_FILES_CACHE[current_session_id]; st.info("Dùng cache tài liệu cho Gemini.")
+
+        if document_file_objects_for_this_turn:
+            for file_obj in document_file_objects_for_this_turn:
                 file_part = google_genai_types.Part(
                     file_data=google_genai_types.FileData(
                         mime_type=file_obj.mime_type, file_uri=file_obj.uri
                     ))
                 current_user_parts.append(file_part)
-            st.success(f"Đã chuẩn bị {len(pdf_file_objects_for_this_turn)} PDF parts để đính kèm.")
-        else: st.warning("Không PDF nào được chuẩn bị để đính kèm.")
-            
+            st.success(f"Đã chuẩn bị {len(document_file_objects_for_this_turn)} parts tài liệu để đính kèm.")
+        else: st.warning("Không có tài liệu nào được chuẩn bị để đính kèm.")
+
+    # If files were already uploaded, append them from cache (if available) to the current user prompt
     elif current_session_id in UPLOADED_FILES_CACHE and UPLOADED_FILES_CACHE[current_session_id]:
-        st.info("Đính kèm lại các file PDF đã upload vào prompt (từ cache).")
-        pdf_file_objects_from_cache = UPLOADED_FILES_CACHE[current_session_id]
-        for file_obj in pdf_file_objects_from_cache:
-            file_part = google_genai_types.Part(
-                file_data=google_genai_types.FileData(
-                    mime_type=file_obj.mime_type, file_uri=file_obj.uri
-                ))
-            current_user_parts.append(file_part)
-        if pdf_file_objects_from_cache : st.success(f"Đã chuẩn bị {len(pdf_file_objects_from_cache)} PDF parts từ cache.")
+         st.info("Đính kèm lại các tài liệu đã upload vào prompt (từ cache).")
+         document_file_objects_from_cache = UPLOADED_FILES_CACHE[current_session_id]
+         for file_obj in document_file_objects_from_cache:
+             file_part = google_genai_types.Part(
+                 file_data=google_genai_types.FileData(
+                     mime_type=file_obj.mime_type, file_uri=file_obj.uri
+                 ))
+             current_user_parts.append(file_part)
+         if document_file_objects_from_cache : st.success(f"Đã chuẩn bị {len(document_file_objects_from_cache)} parts tài liệu từ cache.")
+
 
     gemini_contents.append(google_genai_types.Content(role="user", parts=current_user_parts))
     tools_for_gemini = [google_genai_types.Tool(google_search=google_genai_types.GoogleSearch())]
-    
+
     generation_config_for_stream = google_genai_types.GenerateContentConfig(
         tools=tools_for_gemini,
         response_mime_type="text/plain",
-        system_instruction=system_parts_for_config 
+        system_instruction=system_parts_for_config
     )
-    
+
     full_response_text = ""; captured_grounding_metadata_dict = None; raw_tool_calls_from_stream = []
     try:
         st.info(f"Gọi Gemini API ({model_to_use}) với stream...")
@@ -385,7 +395,7 @@ Bạn có thể cân nhắc ưu tiên của mình (chi phí, thời gian, sự t
             if hasattr(chunk, 'text') and chunk.text: # Check if chunk.text exists and is not empty
                 full_response_text += chunk.text
                 placeholder.markdown(full_response_text + "▌")
-            
+
             # Correctly check for function calls
             if hasattr(chunk, 'candidates') and chunk.candidates:
                 for candidate in chunk.candidates:
@@ -397,7 +407,7 @@ Bạn có thể cân nhắc ưu tiên của mình (chi phí, thời gian, sự t
                                 args_dict = {}
                                 if hasattr(fc, 'args') and fc.args:
                                     try: args_dict = dict(fc.args)
-                                    except TypeError: 
+                                    except TypeError:
                                         args_dict = {"error": "Could not parse fc.args to dict"}
                                         st.warning(f"Không thể convert fc.args sang dict: {type(fc.args)}")
                                 raw_tool_calls_from_stream.append({"name": fc.name, "args": args_dict})
@@ -412,13 +422,13 @@ Bạn có thể cân nhắc ưu tiên của mình (chi phí, thời gian, sự t
                     query_arg = tc['args'].get('query', tc['args'].get('q', 'Không rõ query'))
                     search_queries.append(str(query_arg))
             captured_grounding_metadata_dict = {"search_performed": True, "queries_used_by_gemini": search_queries if search_queries else ["Không rõ query cụ thể."]}
-        
+
         return full_response_text, captured_grounding_metadata_dict
     except GoogleAPIError as e:
         st.error(f"Lỗi API từ Gemini: {getattr(e, 'message', str(e))} (Code: {getattr(e, 'code', 'N/A')})")
         if hasattr(e, 'summary'): st.error(f"Tóm tắt lỗi: {getattr(e, 'summary', '')}")
         return f"[Lỗi Gemini API: {getattr(e, 'message', str(e))}]", None
-    except Exception as e: 
+    except Exception as e:
         st.error(f"Lỗi không xác định khi gọi Gemini API: {e}")
         return f"[Lỗi Gemini: {e}]", None
 
@@ -427,18 +437,18 @@ def init_google_auth():
     if not CLIENT_CONFIG:
         st.error("Google OAuth configuration not found. Please set up google_oauth_config.json")
         return None
-    
+
     flow = Flow.from_client_config(
         CLIENT_CONFIG,
         scopes=['openid', 'https://www.googleapis.com/auth/userinfo.profile', 'https://www.googleapis.com/auth/userinfo.email'],
-        redirect_uri="https://chatbotgtcchcm.streamlit.app/"
+        redirect_uri="https://chatbotgtcchcm.streamlit.app/" # Replace with your actual redirect URI
     )
     return flow
 
 def get_user_info(creds_dict=None):
     import google.auth.transport.requests
     import requests
-    
+
     try:
         if creds_dict:
             credentials = Credentials(
@@ -451,7 +461,7 @@ def get_user_info(creds_dict=None):
             )
         else:
             credentials = st.session_state.user_credentials
-            
+
         if not credentials or not credentials.valid:
             if credentials and credentials.expired and credentials.refresh_token:
                 request = google.auth.transport.requests.Request()
@@ -459,7 +469,7 @@ def get_user_info(creds_dict=None):
                 # Update stored credentials if they were refreshed
                 if hasattr(st.session_state, 'user_credentials'):
                     st.session_state.user_credentials = credentials
-        
+
         userinfo_endpoint = "https://www.googleapis.com/oauth2/v3/userinfo"
         response = requests.get(
             userinfo_endpoint,
@@ -482,6 +492,9 @@ def initialize_auth_and_session():
     if "current_session_id" not in st.session_state: st.session_state.current_session_id = None
     if "chat_history" not in st.session_state: st.session_state.chat_history = []
     if "gemini_api_key" not in st.session_state: st.session_state.gemini_api_key = load_api_key()
+    # State variable to control main content view: "chat" or "library"
+    if "view" not in st.session_state: st.session_state.view = "chat"
+
 
     # Try to refresh existing credentials if present
     if st.session_state.user_credentials and not st.session_state.user_info:
@@ -498,27 +511,28 @@ def initialize_auth_and_session():
                 st.markdown(f"""
                     ### 👋 Chào Mừng Đến Với Trợ Lý Giao Thông Công Cộng Tp.HCM
                     Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông
-                    
+
                     Vui lòng đăng nhập để tiếp tục.
-                    
+
                     [![Login with Google](https://img.shields.io/badge/Login_with_Google-4285F4?style=for-the-badge&logo=google&logoColor=white)]({auth_url})
                     """)
 
                 st.subheader("Hướng dẫn thiết lập sau khi đăng nhập")
 
-                st.image("images/api_key.png", caption="Giao diện nhập API Key (minh họa)") 
+                # Assuming you have saved the images as images/api_key.png and images/api_key1.png
+                st.image("images/api_key.png", caption="Giao diện nhập API Key (minh họa)")
 
-                st.image("images/api_key1.png", caption="Giao diện tạo API Key trên Google AI Studio (minh họa)") 
+                st.image("images/api_key1.png", caption="Giao diện tạo API Key trên Google AI Studio (minh họa)")
 
                 st.markdown("""
                     _(Lưu ý: Các ảnh trên chỉ mang tính minh họa giao diện cần thao tác sau khi đăng nhập.)_
 
-                    Sau khi đăng nhập thành công, bạn sẽ cần cung cấp Gemini API Key để sử dụng chatbot. 
-                    Vui lòng truy cập vào [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey) để tạo cho mình một API key. 
-                    Nhấn nút "Create API key" để lấy một khoá API mới. 
-                    Nếu được yêu cầu tạo một dự án để chứa khoá API, hãy nhanh chóng tạo và đặt một tên bất kỳ cho dự án (ví dụ: "Chatbot Project"), sau đó bạn sẽ có ngay khoá API. 
-                    
-                    Sao chép khoá API vừa tạo và dán vào ô "Nhập Gemini API Key cho tài khoản của bạn" ở cột bên trái (sidebar) sau khi đăng nhập. 
+                    Sau khi đăng nhập thành công, bạn sẽ cần cung cấp Gemini API Key để sử dụng chatbot.
+                    Vui lòng truy cập vào [https://aistudio.google.com/apikey](https://aistudio.google.com/apikey) để tạo cho mình một API key.
+                    Nhấn nút "Create API key" để lấy một khoá API mới.
+                    Nếu được yêu cầu tạo một dự án để chứa khoá API, hãy nhanh chóng tạo và đặt một tên bất kỳ cho dự án (ví dụ: "Chatbot Project"), sau đó bạn sẽ có ngay khoá API.
+
+                    Sao chép khoá API vừa tạo và dán vào ô "Nhập Gemini API Key cho tài khoản của bạn" ở cột bên trái (sidebar) sau khi đăng nhập.
                     Nhấn "Lưu API Key", tạo một phiên trò chuyện mới, và bạn đã sẵn sàng sử dụng trợ lý giao thông!
                     """)
                 st.stop()
@@ -528,7 +542,7 @@ def initialize_auth_and_session():
                     flow.fetch_token(code=code)
                     credentials = flow.credentials
                     st.session_state.user_credentials = credentials
-                    
+
                     user_info = get_user_info()
                     if user_info:
                         st.session_state.user_info = user_info
@@ -543,7 +557,7 @@ def initialize_auth_and_session():
                                 picture = excluded.picture,
                                 created_at = excluded.created_at
                                 -- Intentionally not updating gemini_api_key to preserve it
-                        """, (user_info['email'], user_info['name'], 
+                        """, (user_info['email'], user_info['name'],
                              user_info.get('picture', ''), int(time.time())))
                         conn.commit()
 
@@ -552,7 +566,7 @@ def initialize_auth_and_session():
                         api_key_row = cursor.fetchone()
                         if api_key_row and api_key_row[0]:
                             st.session_state.gemini_api_key = api_key_row[0]
-                        
+
                         conn.close()
                         st.rerun()
                 except Exception as e:
@@ -570,11 +584,13 @@ init_db()
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="Trợ lý Giao Thông Công Cộng HCM", layout="wide")
-initialize_auth_and_session()
+initialize_auth_and_session() # Initialize auth and session state, including 'view'
 
 if st.session_state.gemini_api_key and GEMINI_CLIENT is None:
     GEMINI_CLIENT = get_gemini_client(st.session_state.gemini_api_key)
 
+
+# --- Sidebar ---
 with st.sidebar:
     if st.session_state.user_info:
         col1, col2 = st.columns([0.7, 0.3])
@@ -585,116 +601,163 @@ with st.sidebar:
                 # Clear query parameters first
                 st.query_params.clear()
                 # Clear all session state
-                for key in ['user_credentials', 'user_info', 'current_session_id', 'chat_history', 'sessions_list', 'gemini_api_key']:
+                for key in ['user_credentials', 'user_info', 'current_session_id', 'chat_history', 'sessions_list', 'gemini_api_key', 'view']: # Clear 'view' state too
                     if key in st.session_state:
                         del st.session_state[key]
                 st.rerun()
         if st.session_state.user_info.get('picture'):
             st.image(st.session_state.user_info['picture'], width=50)
         st.divider()
-        
+
+    # --- "Thư Viện" button in sidebar ---
+    # Only show library button if logged in
+    if st.session_state.user_info:
+        if st.button("📚 Thư Viện Tài Liệu", use_container_width=True, key="library_sidebar_button"):
+             st.session_state.view = "library" # Change view state
+             st.rerun() # Rerun to show library view
+        st.divider() # Add a separator
+
+
     st.header("Phiên trò chuyện")
-    if st.button("➕ Trò chuyện mới", use_container_width=True):
-        new_id, _ = create_new_session_db(); st.session_state.current_session_id = new_id
-        st.session_state.chat_history = []; 
-        if new_id in UPLOADED_FILES_CACHE: del UPLOADED_FILES_CACHE[new_id] 
-        st.session_state.sessions_list = get_sessions_db(); st.rerun()
-    
-    st.session_state.sessions_list = get_sessions_db() # Refresh list
-    if not st.session_state.current_session_id and st.session_state.sessions_list:
-        st.session_state.current_session_id = st.session_state.sessions_list[0]["id"]
-        st.session_state.chat_history = load_messages_db(st.session_state.current_session_id)
-    
-    for session_item in st.session_state.sessions_list:
-        cols = st.columns([0.7, 0.15, 0.15]); 
-        is_curr = st.session_state.current_session_id == session_item['id']
-        btn_label = f"{'➡️ ' if is_curr else ''}{session_item['name']}"
-        if cols[0].button(btn_label, key=f"session_{session_item['id']}", use_container_width=True):
-            if not is_curr: 
-                st.session_state.current_session_id = session_item['id']; 
-                st.session_state.chat_history = load_messages_db(session_item['id']); 
-                st.rerun()
-        if cols[1].button("✏️", key=f"rename_{session_item['id']}", help="Đổi tên"): 
-            st.session_state.renaming_session_id = session_item['id']; st.rerun()
-        if cols[2].button("🗑️", key=f"delete_{session_item['id']}", help="Xoá"):
-            if delete_session_db(session_item['id']):
-                if st.session_state.current_session_id == session_item['id']: 
-                    st.session_state.current_session_id = None; st.session_state.chat_history = []
-                if session_item['id'] in UPLOADED_FILES_CACHE: del UPLOADED_FILES_CACHE[session_item['id']]
-                st.session_state.sessions_list = get_sessions_db(); st.rerun()
-                
-    if st.session_state.get('renaming_session_id'):
-        with st.form(key="rename_form"):
-            st.subheader("Đổi tên trò chuyện")
-            current_name_for_rename = next((s['name'] for s in st.session_state.sessions_list if s['id'] == st.session_state.renaming_session_id), "")
-            new_session_name = st.text_input("Tên mới:", value=current_name_for_rename)
-            if st.form_submit_button("Lưu"):
-                if new_session_name.strip():
-                    if rename_session_db(st.session_state.renaming_session_id, new_session_name.strip()):
-                        del st.session_state.renaming_session_id; 
-                        st.session_state.sessions_list = get_sessions_db(); st.rerun()
-                else: 
-                    st.warning("Tên không được để trống.")
+    # Only show session management if logged in and in chat view
+    if st.session_state.user_info and st.session_state.view == "chat":
+        if st.button("➕ Trò chuyện mới", use_container_width=True):
+            new_id, _ = create_new_session_db(); st.session_state.current_session_id = new_id
+            st.session_state.chat_history = [];
+            if new_id in UPLOADED_FILES_CACHE: del UPLOADED_FILES_CACHE[new_id]
+            st.session_state.sessions_list = get_sessions_db(); st.rerun()
+
+        st.session_state.sessions_list = get_sessions_db() # Refresh list
+        if not st.session_state.current_session_id and st.session_state.sessions_list:
+            st.session_state.current_session_id = st.session_state.sessions_list[0]["id"]
+            st.session_state.chat_history = load_messages_db(st.session_state.current_session_id)
+
+        # Display session list only in chat view
+        for session_item in st.session_state.sessions_list:
+            cols = st.columns([0.7, 0.15, 0.15]);
+            is_curr = st.session_state.current_session_id == session_item['id']
+            btn_label = f"{'➡️ ' if is_curr else ''}{session_item['name']}"
+            if cols[0].button(btn_label, key=f"session_{session_item['id']}", use_container_width=True):
+                if not is_curr:
+                    st.session_state.current_session_id = session_item['id'];
+                    st.session_state.chat_history = load_messages_db(session_item['id']);
+                    st.rerun()
+            if cols[1].button("✏️", key=f"rename_{session_item['id']}", help="Đổi tên"):
+                st.session_state.renaming_session_id = session_item['id']; st.rerun()
+            if cols[2].button("🗑️", key=f"delete_{session_item['id']}", help="Xoá"):
+                if delete_session_db(session_item['id']):
+                    if st.session_state.current_session_id == session_item['id']:
+                        st.session_state.current_session_id = None; st.session_state.chat_history = []
+                    if session_item['id'] in UPLOADED_FILES_CACHE: del UPLOADED_FILES_CACHE[session_item['id']]
+                    st.session_state.sessions_list = get_sessions_db(); st.rerun()
+
+        if st.session_state.get('renaming_session_id'):
+            with st.form(key="rename_form"):
+                st.subheader("Đổi tên trò chuyện")
+                current_name_for_rename = next((s['name'] for s in st.session_state.sessions_list if s['id'] == st.session_state.renaming_session_id), "")
+                new_session_name = st.text_input("Tên mới:", value=current_name_for_rename)
+                if st.form_submit_button("Lưu"):
+                    if new_session_name.strip():
+                        if rename_session_db(st.session_state.renaming_session_id, new_session_name.strip()):
+                            del st.session_state.renaming_session_id;
+                            st.session_state.sessions_list = get_sessions_db(); st.rerun()
+                    else:
+                        st.warning("Tên không được để trống.")
     st.divider()
     st.header("Cài đặt API Gemini")
     if st.session_state.user_info:
         if st.session_state.gemini_api_key:
             st.success(f"API Key được cấu hình cho tài khoản {st.session_state.user_info.get('email')}")
-            if st.button("Thay đổi/Xóa API Key"): 
+            if st.button("Thay đổi/Xóa API Key"):
                 st.session_state.gemini_api_key = None
                 save_api_key(None)
                 GEMINI_CLIENT = None
                 st.rerun()
         else:
-            new_key = st.text_input("Nhập Gemini API Key cho tài khoản của bạn:", 
+            new_key = st.text_input("Nhập Gemini API Key cho tài khoản của bạn:",
                                   type="password", key="new_gem_key_input")
             if st.button("Lưu API Key", key="save_gem_key_btn"):
-                if new_key: 
+                if new_key:
                     client_test = get_gemini_client(new_key) # Test key
-                    if client_test: 
+                    if client_test:
                         if save_api_key(new_key):
                             st.session_state.gemini_api_key = new_key
                             GEMINI_CLIENT = client_test
                             st.success(f"Đã lưu API Key cho tài khoản {st.session_state.user_info.get('email')}!")
                             st.rerun()
-                else: 
+                else:
                     st.warning("Vui lòng nhập API Key.")
 
-st.title("Trợ Lý Giao Thông Công Cộng TP.HCM")
-current_session_name = "Chưa chọn phiên"
-if st.session_state.current_session_id:
-    cs_info = next((s for s in st.session_state.sessions_list if s["id"] == st.session_state.current_session_id), None)
-    if cs_info: current_session_name = cs_info["name"]
-st.subheader(f"Phiên: {current_session_name}")
+# --- Main Content Area ---
+if st.session_state.view == "chat":
+    # --- Chat Interface ---
+    st.title("Trợ Lý Giao Thông Công Cộng TP.HCM")
+    current_session_name = "Chưa chọn phiên"
+    if st.session_state.current_session_id:
+        cs_info = next((s for s in st.session_state.sessions_list if s["id"] == st.session_state.current_session_id), None)
+        if cs_info: current_session_name = cs_info["name"]
+    st.subheader(f"Phiên: {current_session_name}")
 
-if st.session_state.current_session_id:
-    for msg in st.session_state.chat_history:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
-            if msg.get("gemini_grounding_metadata"):
-                meta = msg["gemini_grounding_metadata"]
-                with st.expander("Thông tin tìm kiếm Google (từ Gemini)", expanded=False):
-                    if meta.get("search_performed"): st.caption("Gemini đã sử dụng Google Search.")
-                    if meta.get("queries_used_by_gemini"): st.write("Truy vấn có thể đã dùng:", meta.get("queries_used_by_gemini"))
-                    if not meta.get("queries_used_by_gemini") and meta.get("search_performed"): st.write("Không có chi tiết truy vấn từ stream.")
-                    elif not meta.get("search_performed"): st.write("Không có tìm kiếm nào được thực hiện.")
+    if st.session_state.current_session_id:
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+                if msg.get("gemini_grounding_metadata"):
+                    meta = msg["gemini_grounding_metadata"]
+                    with st.expander("Thông tin tìm kiếm Google (từ Gemini)", expanded=False):
+                        if meta.get("search_performed"): st.caption("Gemini đã sử dụng Google Search.")
+                        if meta.get("queries_used_by_gemini"): st.write("Truy vấn có thể đã dùng:", meta.get("queries_used_by_gemini"))
+                        if not meta.get("queries_used_by_gemini") and meta.get("search_performed"): st.write("Không có chi tiết truy vấn từ stream.")
+                        elif not meta.get("search_performed"): st.write("Không có tìm kiếm nào được thực hiện.")
+
+    user_prompt = st.chat_input("Câu hỏi về giao thông công cộng TP.HCM:")
+    if user_prompt: # No need to check st.session_state.current_session_id here, handle below
+        if not st.session_state.current_session_id:
+             st.warning("Vui lòng chọn hoặc tạo phiên trò chuyện mới để bắt đầu.")
+        elif not GEMINI_CLIENT:
+             st.error("Client Gemini chưa sẵn sàng. Vui lòng cài đặt API Key ở cột bên trái.")
+        else:
+            # Proceed with chat
+            st.session_state.chat_history.append({"role": "user", "content": user_prompt})
+            save_message_db(st.session_state.current_session_id, "user", user_prompt)
+            with st.chat_message("user"): st.markdown(user_prompt)
+            with st.chat_message("assistant"):
+                full_response, grounding_meta_dict = generate_gemini_response_stream(
+                    GEMINI_CLIENT, user_prompt, st.session_state.current_session_id,
+                    st.session_state.chat_history[:-1] # Pass history *before* this user's current message
+                )
+                assistant_msg_obj = {"role": "assistant", "content": full_response}
+                if grounding_meta_dict: assistant_msg_obj["gemini_grounding_metadata"] = grounding_meta_dict
+                st.session_state.chat_history.append(assistant_msg_obj)
+                save_message_db(st.session_state.current_session_id, "assistant", full_response, grounding_metadata_obj=grounding_meta_dict)
 
 
-user_prompt = st.chat_input("Câu hỏi về giao thông công cộng TP.HCM:")
-if user_prompt and st.session_state.current_session_id:
-    if not GEMINI_CLIENT: st.error("Client Gemini chưa sẵn sàng. Kiểm tra API Key.")
+elif st.session_state.view == "library":
+    # --- Library Interface ---
+    st.title("Thư Viện Tài Liệu Giao Thông Công Cộng")
+    if st.button("⬅️ Quay lại Trò chuyện", key="back_to_chat_button"):
+        st.session_state.view = "chat" # Change view state back to chat
+        st.rerun() # Rerun to show chat view
+
+    st.markdown("---") # Separator
+
+    if not GROUNDING_FILENAMES:
+        st.info("Không có tài liệu nào được cấu hình để hiển thị.")
     else:
-        st.session_state.chat_history.append({"role": "user", "content": user_prompt})
-        save_message_db(st.session_state.current_session_id, "user", user_prompt)
-        with st.chat_message("user"): st.markdown(user_prompt)
-        with st.chat_message("assistant"):
-            full_response, grounding_meta_dict = generate_gemini_response_stream(
-                GEMINI_CLIENT, user_prompt, st.session_state.current_session_id,
-                st.session_state.chat_history[:-1] # Pass history *before* this user's current message
-            )
-            assistant_msg_obj = {"role": "assistant", "content": full_response}
-            if grounding_meta_dict: assistant_msg_obj["gemini_grounding_metadata"] = grounding_meta_dict
-            st.session_state.chat_history.append(assistant_msg_obj)
-            save_message_db(st.session_state.current_session_id, "assistant", full_response, grounding_metadata_obj=grounding_meta_dict)
-elif user_prompt and not st.session_state.current_session_id:
-    st.warning("Vui lòng chọn hoặc tạo phiên trò chuyện mới.")
+        for filename in GROUNDING_FILENAMES:
+            file_path_obj = DOC_DIR / filename
+            if file_path_obj.exists():
+                try:
+                    content = file_path_obj.read_text(encoding='utf-8') # Read content with UTF-8 encoding
+                    st.subheader(f"📄 {filename}")
+                    st.markdown(content) # Render Markdown content as rich text
+                    st.markdown("---") # Separator between documents
+                except FileNotFoundError:
+                    st.error(f"Không tìm thấy file: {filename}")
+                    st.markdown("---")
+                except Exception as e:
+                    st.error(f"Lỗi khi đọc file {filename}: {e}")
+                    st.markdown("---")
+            else:
+                st.warning(f"File không tồn tại trong thư mục 'documents': {filename}")
+                st.markdown("---")
