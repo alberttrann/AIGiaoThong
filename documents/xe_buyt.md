@@ -1,7 +1,5 @@
 # Báo cáo Tổng hợp Thông tin Hệ thống Xe buýt Thành phố Hồ Chí Minh
 
-**Lời mở đầu:** Báo cáo này được biên soạn nhằm cung cấp một cái nhìn toàn diện và chi tiết về hệ thống xe buýt tại Thành phố Hồ Chí Minh (TP.HCM), bao gồm thông tin về mạng lưới tuyến, giá vé, các kênh tra cứu, loại hình phương tiện và những cập nhật mới nhất. Mục tiêu là hỗ trợ người dân và du khách có thể dễ dàng tiếp cận và sử dụng hiệu quả dịch vụ xe buýt, một phương tiện giao thông công cộng quan trọng của thành phố.
-
 ## I. Giới thiệu chung về Hệ thống Xe buýt Thành phố Hồ Chí Minh
 
 ### A. Tổng quan về mạng lưới xe buýt và vai trò trong giao thông đô thị TP.HCM
@@ -22,21 +20,6 @@ Các thông tin liên hệ khác bao gồm:
 
 Bên cạnh vai trò quản lý của Trung tâm, việc vận hành trực tiếp các tuyến xe buýt được đảm nhiệm bởi nhiều doanh nghiệp và hợp tác xã vận tải khác nhau. Một số đơn vị tiêu biểu có thể kể đến như Liên hiệp HTX Xe buýt TP.HCM, SaigonBus, Công ty Cổ phần Xe khách Phương Trang (FutaBusLines), VinBus, Công ty TNHH Du lịch Dịch vụ Xây dựng Bảo Yến, và nhiều đơn vị khác [1]. Mô hình hợp tác công-tư này, với sự tham gia của nhiều đơn vị vận hành, một mặt có thể tạo ra sự cạnh tranh và đa dạng trong cung cấp dịch vụ, mặt khác cũng đặt ra yêu cầu cao về công tác điều phối, giám sát và đảm bảo tiêu chuẩn chất lượng đồng bộ trên toàn hệ thống từ phía cơ quan quản lý nhà nước. Việc này đòi hỏi Trung tâm Quản lý Giao thông công cộng phải có một vai trò điều phối mạnh mẽ, thiết lập các quy chuẩn dịch vụ rõ ràng và cơ chế giám sát hiệu quả để mọi hành khách đều nhận được chất lượng phục vụ tốt nhất, dù họ đi trên tuyến xe của bất kỳ nhà cung cấp nào.
 
-### C. Thông tin chi tiết về các đơn vị vận tải
-
-Sự tham gia của nhiều đơn vị vận tải trong việc khai thác các tuyến xe buýt tại TP.HCM tạo nên một bức tranh đa dạng. Mỗi đơn vị thường đảm nhận một số tuyến nhất định. Việc nắm rõ đơn vị nào vận hành tuyến xe mình hay sử dụng có thể hữu ích cho hành khách khi cần phản hồi cụ thể về chất lượng dịch vụ. Dưới đây là một số đơn vị vận tải chính và các tuyến xe buýt do họ phụ trách, dựa trên dữ liệu thống kê [1]:
-
-*   **Công ty Cổ phần Xe khách Phương Trang (FutaBusLines):** Đảm nhận một số lượng lớn các tuyến, bao gồm các tuyến 09, 16, 29, 41, 47, 57, 61, 67, 68, 73, 78, 79, 84, 99, 102, 109, 141, 151, và nhiều tuyến khác, kể cả các tuyến xe điện mới như 153, 154, 155, 156, 157, 158, 159, 160, 161.
-*   **Công ty Cổ phần Xe khách Sài Gòn (SaigonBus):** Vận hành các tuyến như 06, 07, 10, 27, 28, 30, 31, 36, 38, 39, 45, 50, 52, 55, 62, 64, 71, 91, 93, 103, 139, 148.
-*   **Hợp tác xã vận tải 19/5:** Chịu trách nhiệm các tuyến 03, 13, 18, 19, 23, 24, 33, 48, 70, 85 (và nhánh 62-5), 87, 94, 107 (và nhánh 70-5), 122, 126 (và nhánh 61-7), 145, 150.
-*   **Hợp tác xã vận tải liên tỉnh và du lịch Việt Thắng:** Khai thác các tuyến 22, 25, 32, 58, 74, 81, 94 (cùng HTX 19/5), 100 và một số tuyến nhánh.
-*   **Công ty TNHH Du lịch dịch vụ xây dựng Bảo Yến:** Vận hành các tuyến 01, 04, 43, 65, 152.
-*   **Hợp tác xã vận tải xe buýt Quyết Thắng:** Đảm nhận các tuyến 05, 08, 53, 56.
-*   **Liên hiệp hợp tác xã vận tải thành phố:** Phụ trách các tuyến 14, 104.
-
-Danh sách này chưa phải là tất cả nhưng bao gồm các đơn vị lớn, cho thấy sự phân chia trách nhiệm trong việc cung cấp dịch vụ vận tải hành khách công cộng bằng xe buýt trên địa bàn thành phố. Sự đa dạng này, trong khi huy động được nguồn lực xã hội, cũng đòi hỏi một cơ chế quản lý hiệu quả để đảm bảo chất lượng dịch vụ đồng đều và đáp ứng nhu cầu ngày càng cao của người dân.
-
-Sự tồn tại của nhiều kênh thông tin, từ website chính thức, ứng dụng di động đến các diễn đàn cộng đồng, cho thấy nhu cầu lớn về thông tin xe buýt. Tuy nhiên, việc một số trang thông tin chính thức gặp khó khăn trong truy cập càng nhấn mạnh tầm quan trọng của việc xây dựng và duy trì một nguồn thông tin tập trung, chính xác, và dễ dàng tiếp cận cho tất cả người dùng.
 
 ## II. Hướng dẫn Tra cứu Thông tin Xe buýt
 
@@ -70,21 +53,6 @@ Sự tồn tại của nhiều kênh thông tin, từ website chính thức, ứ
         -   Phản hồi ý kiến: Cho phép người dùng đóng góp ý kiến về chất lượng dịch vụ.
         -   Cập nhật dữ liệu trực tiếp: Đảm bảo thông tin luôn mới nhất. BusMap có phiên bản miễn phí và các gói Premium trả phí với thêm nhiều tiện ích [14].
 
-Sự tồn tại của nhiều kênh thông tin, từ website đến các ứng dụng di động, mang lại nhiều lựa chọn cho người dùng. Tuy nhiên, điều này cũng đặt ra một thách thức không nhỏ cho cơ quan quản lý trong việc đảm bảo tính nhất quán, chính xác và cập nhật của dữ liệu trên tất cả các nền tảng. Nếu thông tin giữa các kênh không đồng bộ, hoặc website chính thức không được cập nhật kịp thời, người dùng có thể cảm thấy hoang mang và mất niềm tin. Do đó, việc xây dựng một cơ sở dữ liệu trung tâm, được cập nhật liên tục và tự động đồng bộ hóa với tất cả các kênh thông tin chính thức là hết sức quan trọng. Điều này sẽ đảm bảo rằng mọi hành khách, dù sử dụng kênh nào, đều nhận được thông tin đáng tin cậy.Mặt khác, sự hiện diện của cả ứng dụng "chính thức" như Go!Bus và các ứng dụng tư nhân phổ biến như BusMap tạo ra một môi trường cạnh tranh lành mạnh, có thể thúc đẩy sự đổi mới và cải tiến liên tục, mang lại nhiều tính năng hữu ích hơn cho người dùng. Cơ quan quản lý có thể xem xét việc khuyến khích sự phát triển của các ứng dụng bên thứ ba thông qua việc cung cấp dữ liệu mở (open data), song song với việc duy trì và nâng cao chất lượng của ứng dụng chính thức.
-
-### C. Các bến xe buýt và trạm trung chuyển chính
-
-Mạng lưới xe buýt TP.HCM được tổ chức xoay quanh một số bến xe và trạm trung chuyển lớn, đóng vai trò là các đầu mối giao thông quan trọng, nơi nhiều tuyến xe gặp nhau, tạo điều kiện thuận lợi cho hành khách chuyển tuyến. Một số bến và trạm chính bao gồm [1]:
-
-*   **Trạm Điều hành Sài Gòn (Khu vực Bến Thành):** Đây là một trong những điểm trung chuyển sầm uất nhất, là điểm đầu/cuối của rất nhiều tuyến xe buýt tỏa đi khắp thành phố.
-*   **Bến xe Chợ Lớn (bao gồm Bến xe buýt Chợ Lớn A và B):** Một đầu mối giao thông quan trọng khác, đặc biệt phục vụ khu vực Chợ Lớn và các quận lân cận.
-*   **Bến xe Miền Đông (cũ và mới):** Kết nối TP.HCM với các tỉnh miền Đông Nam Bộ và miền Trung, Tây Nguyên. Nhiều tuyến xe buýt có điểm đầu/cuối tại đây để phục vụ hành khách đi/đến bến xe.
-*   **Bến xe Miền Tây:** Cửa ngõ kết nối TP.HCM với các tỉnh Đồng bằng sông Cửu Long, cũng là điểm tập trung của nhiều tuyến xe buýt.
-*   **Khu Đại học Quốc gia TP.HCM (Thành phố Thủ Đức):** Một trung tâm trung chuyển lớn, phục vụ nhu cầu đi lại của hàng chục ngàn sinh viên và giảng viên.
-*   **Công viên 23 Tháng 9:** Cũng là một điểm đầu/cuối và trung chuyển của nhiều tuyến xe buýt quan trọng.
-*   **Bến xe An Sương, Bến xe Ngã Tư Ga, Bến xe Quận 8:** Là các đầu mối quan trọng ở các khu vực cửa ngõ và các quận đông dân cư.
-
-Việc phát triển và tối ưu hóa các đầu mối trung chuyển này – bao gồm cơ sở vật chất, hệ thống thông tin, các tiện ích cho hành khách và khả năng kết nối với các loại hình giao thông khác – là yếu tố then chốt để nâng cao trải nghiệm người dùng và hiệu quả của toàn bộ hệ thống giao thông công cộng. Quy hoạch đô thị và giao thông cần đặc biệt chú trọng đến vai trò của các "hub" này.
 
 ## IV. Giá vé, Các loại vé và Hình thức Thanh toán
 
@@ -171,28 +139,6 @@ Nhằm nâng cao chất lượng dịch vụ và sự thoải mái cho hành kh�
     *   Thiết bị thông báo trạm tự động: Thông báo tên trạm dừng sắp tới bằng âm thanh (và đôi khi cả hình ảnh), giúp hành khách chủ động chuẩn bị xuống xe.
     *   Thiết bị thu soát vé tự động: Được lắp đặt trên các xe thuộc các tuyến đã triển khai hệ thống vé điện tử UniPass hoặc các hình thức thanh toán không dùng tiền mặt khác. Các trang thiết bị hiện đại này thường được trang bị 100% trên các phương tiện mới được các đơn vị khai thác đưa vào sử dụng sau khi trúng thầu các tuyến [5].
 *   **Thiết kế thân thiện:** Một số dòng xe mới có thể có thiết kế sàn thấp hoặc bán thấp, tạo điều kiện thuận lợi hơn cho người cao tuổi, người khuyết tật, và hành khách có hành lý lên xuống xe.
-
-Việc liên tục nâng cấp và trang bị các tiện nghi hiện đại cho đội xe là một yếu tố then chốt để thu hút và giữ chân hành khách. Khi chất lượng phương tiện được cải thiện – xe mới hơn, sạch sẽ hơn, tiện nghi hơn – sự hài lòng của hành khách sẽ tăng lên. Điều này đặc biệt quan trọng trong bối cảnh cạnh tranh từ các loại hình vận tải khác như xe ôm công nghệ [21]. Thực tế đã cho thấy, nhờ việc nâng cao chất lượng phục vụ và phương tiện, lượng hành khách đi xe buýt đã có xu hướng tăng dần [5]. Đây là một minh chứng cho thấy đầu tư vào chất lượng xe không chỉ là chi phí, mà còn là đầu tư vào sự phát triển bền vững của hệ thống giao thông công cộng.
-
-## VI. Cập nhật Thông tin Quan trọng (Từ đầu năm 2025 đến nay)
-
-Hệ thống xe buýt TP.HCM luôn có những điều chỉnh và cập nhật để phù hợp với tình hình thực tế và các sự kiện của thành phố. Dưới đây là một số thông tin quan trọng được ghi nhận từ đầu năm 2025:
-
-### A. Các thay đổi về lộ trình, giá vé
-
-*   **Điều chỉnh lộ trình và bổ sung điểm dừng tuyến xe buýt điện số 165 (Đại học Nông Lâm – Khu Công nghệ cao):** Kể từ ngày 19 tháng 5 năm 2025, tuyến xe buýt điện 165 đã có sự điều chỉnh về lộ trình và bổ sung thêm các điểm dừng. Thay đổi này được thực hiện nhằm tối ưu hóa hiệu quả hoạt động và nâng cao sự tiện lợi cho hành khách sử dụng tuyến [11].
-*   **Khôi phục lộ trình các tuyến xe buýt sau Lễ 30/4:** Sau thời gian tạm điều chỉnh lộ trình để phục vụ các hoạt động kỷ niệm 50 năm Ngày Giải phóng miền Nam, thống nhất đất nước, các tuyến xe buýt bị ảnh hưởng đã được khôi phục lộ trình hoạt động bình thường kể từ ngày 01 tháng 5 năm 2025 [11].
-*   **Điều chỉnh lộ trình tạm thời tuyến 71 và 73 phục vụ Đại lễ Vesak 2025:** Trung tâm Quản lý Giao thông công cộng đã thông báo về việc tạm điều chỉnh lộ trình hoạt động của hai tuyến xe buýt có trợ giá số 71 (Bến xe An Sương – Phật Cô Đơn) và số 73 (Chợ Bình Chánh – Khu công nghiệp Lê Minh Xuân). Việc điều chỉnh này nhằm phục vụ công tác tổ chức giao thông trong thời gian diễn ra Đại lễ Vesak Liên Hiệp Quốc năm 2025 tại khu vực Học viện Phật Giáo Việt Nam, huyện Bình Chánh (thông báo ngày 02/05/2025) [11].
-*   **Thông tin giá vé tuyến xe buýt điện 155:** Tuyến xe buýt điện 155 (Bến xe buýt Sài Gòn – Nhà hát Thành phố) được giới thiệu với mức giá vé từ **3.000 - 5.000 đồng**, là lựa chọn di chuyển tiện lợi, tiết kiệm và thân thiện với môi trường trong khu vực trung tâm Quận 1 (thông tin ngày 21/05/2025) [11].
-
-Những cập nhật này cho thấy sự năng động của hệ thống xe buýt trong việc thích ứng với các sự kiện văn hóa, xã hội lớn của thành phố, cũng như những nỗ lực liên tục trong việc tối ưu hóa mạng lưới và dịch vụ. Khả năng điều chỉnh hoạt động một cách linh hoạt là rất quan trọng đối với một đô thị lớn và sôi động như TP.HCM, giúp đảm bảo giao thông thông suốt và phục vụ tốt nhất nhu cầu đi lại của người dân.
-
-### B. Các thông báo đặc biệt từ Trung tâm Quản lý Giao thông công cộng
-
-*   **Miễn vé xe buýt dịp Lễ 30/4/2025:** Một thông báo đáng chú ý là hệ thống xe buýt TP.HCM đã thực hiện miễn vé sử dụng trên tất cả các tuyến xe buýt trong ngày 30 tháng 4 năm 2025 [15]. Đây là một chính sách ưu đãi đặc biệt, tạo điều kiện thuận lợi cho người dân tham gia các hoạt động kỷ niệm và vui chơi trong ngày lễ lớn của đất nước. Chính sách này không chỉ khuyến khích người dân sử dụng phương tiện công cộng mà còn thể hiện sự quan tâm của chính quyền thành phố, góp phần xây dựng hình ảnh tích cực cho xe buýt.
-*   **Hướng dẫn di chuyển bằng xe buýt phục vụ Đại lễ Vesak 2025:** Trung tâm Quản lý Giao thông công cộng cũng đã ban hành hướng dẫn chi tiết lộ trình di chuyển bằng xe buýt đến bãi xe trung chuyển miễn phí số 3 để phục vụ người dân và Phật tử tham dự Đại lễ Phật đản Vesak 2025 (thông báo ngày 03/05/2025) [11].
-
-Các thông báo này một lần nữa khẳng định vai trò đồng hành của hệ thống xe buýt trong các sự kiện quan trọng của thành phố, đồng thời cho thấy những nỗ lực trong việc cung cấp thông tin và hỗ trợ kịp thời cho hành khách.
 
 ## VII. Một số Lưu ý và Lời khuyên khi Sử dụng Xe buýt tại TP.HCM
 
