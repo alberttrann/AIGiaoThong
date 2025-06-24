@@ -264,6 +264,13 @@ Việc cung cấp địa chỉ chính xác của từng bến tàu giúp ngườ
         *   Các chuyến "Daily" (Bạch Đằng - Linh Đông và ngược lại): Có 4 chuyến đi và 4 chuyến về mỗi ngày. 54
         *   Các chuyến ngắn hơn (ví dụ: Bạch Đằng - Thủ Thiêm – Bình An và ngược lại): Có tần suất hoạt động dày hơn, đặc biệt vào các ngày cuối tuần và lễ, với nhiều khung giờ khởi hành khác nhau.54
     *   **Thời gian hành trình:** Thời gian di chuyển toàn tuyến từ Bến Bạch Đằng đến Bến Linh Đông (hoặc ngược lại) mất khoảng từ 30 phút đến 52 phút, tùy thuộc vào điều kiện vận hành và thời gian dừng đón trả khách tại các bến.49 Thời gian di chuyển giữa các bến gần nhau hơn sẽ ngắn hơn, ví dụ từ Bạch Đằng đến Thủ Thiêm chỉ mất khoảng 5 phút.7º Do lịch trình có thể thay đổi và có nhiều loại chuyến khác nhau, người dùng nên kiểm tra kỹ thông tin lịch chạy cập nhật trên website chính thức của Saigon Waterbus hoặc các ứng dụng hỗ trợ trước mỗi chuyến đi để tránh nhầm lẫn hoặc phải chờ đợi lâu.
+* **Lộ trình**:
+  *Đi đến Linh Đông:
+Bến số 1 Bạch Đằng, Q.1 - Bến số 2 Sài Gòn Pearl, Q. Bình Thạnh - Bến số 3 Bình An, Q.2 - Bến số 4 Thảo Điền, Q.2 - Bến số 5 Tầm Vu, Q. Bình Thạnh - Bến số 6 Thanh Đa, Q. Bình Thạnh - Bến số 7 Bình Triệu, Q. Thủ Đức - Bến số 8 Hiệp Bình Chánh, Q. Thủ Đức - Bến số 9 Bình Quới, Q. Thủ Đức
+
+Đi đến Bạch Đằng:
+Bến số 9 Bình Quới, Q. Thủ Đức - Bến số 8 Hiệp Bình Chánh, Q. Thủ Đức - Bến số 7 Bình Triệu, Q. Thủ Đức - Bến số 6 Thanh Đa, Q. Bình Thạnh - Bến số 5 Tầm Vu, Q. Bình Thạnh - Bến số 4 Thảo Điền, Q.2 - Bến số 3 Bình An, Q.2 - Bến số 2 Sài Gòn Pearl, Q. Bình Thạnh - Bến số 1 Bạch Đằng, Q.1
+
 *   **Giá vé:**
     Một trong những điểm hấp dẫn của Saigon Waterbus là mức giá vé rất phải chăng:
     *   Đồng giá 15.000 VNĐ/lượt/người cho tất cả các chặng trên tuyến, áp dụng cho một lần lên và một lần xuống tàu.49
