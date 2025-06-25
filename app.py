@@ -510,7 +510,9 @@ def initialize_auth_and_session():
                 auth_url, _ = flow.authorization_url(prompt='consent')
                 st.markdown(f"""
                     ### 👋 Chào Mừng Đến Với Trợ Lý Giao Thông Công Cộng Tp.HCM
-                    Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông
+                    Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông. 
+
+                    Tài liệu cho các hạng mục phương tiện, có thể được xem đầy đủ ở đây: https://github.com/alberttrann/AIGiaoThong/tree/main/documents
 
                     Vui lòng đăng nhập để tiếp tục.
 
