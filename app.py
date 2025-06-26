@@ -23,14 +23,13 @@ GEMINI_API_KEY_FILE = Path("gemini_api_key.json")
 DATABASE_PATH = Path("chat_sessions.db")
 GOOGLE_OAUTH_CONFIG = Path("google_oauth_config.json")
 
-GEMINI_MODEL_ID = "gemini-2.0-flash" # Sticking to user's specified model ID
+GEMINI_MODEL_ID = "gemini-2.0-flash" 
 GEMINI_CLIENT = None
 UPLOADED_FILES_CACHE = {}
 
 # --- OAuth Configuration ---
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # Only for development
 
-# Get OAuth config from secrets in production, fallback to file in development
 CLIENT_CONFIG = None
 try:
     CLIENT_CONFIG = {
@@ -43,12 +42,13 @@ try:
         }
     }
 except Exception:
-    # Fallback to file in development
+    
     if GOOGLE_OAUTH_CONFIG.exists():
         CLIENT_CONFIG = json.loads(GOOGLE_OAUTH_CONFIG.read_text())
 
 
 # --- Database Helper Functions ---
+
 def init_db():
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
@@ -243,13 +243,12 @@ def upload_files_to_gemini(client, filenames_list, current_session_id):
 
     if uploaded_file_objects:
         UPLOADED_FILES_CACHE[current_session_id] = uploaded_file_objects
-        # Use the updated function name if you changed it, otherwise keep as is
         mark_files_uploaded_for_session_db(current_session_id)
     else:
         st.warning("Không có tài liệu nào được upload thành công.")
     return uploaded_file_objects
 
-
+# (generate_gemini_response_stream function 
 def generate_gemini_response_stream(client, user_prompt_text, current_session_id, existing_chat_history):
     global UPLOADED_FILES_CACHE
     model_to_use = GEMINI_MODEL_ID
@@ -432,7 +431,7 @@ Bạn có thể cân nhắc ưu tiên của mình (chi phí, thời gian, sự t
         st.error(f"Lỗi không xác định khi gọi Gemini API: {e}")
         return f"[Lỗi Gemini: {e}]", None
 
-# --- Authentication Functions ---
+# (Authentication functions init_google_auth, get_user_info remain the same)
 def init_google_auth():
     if not CLIENT_CONFIG:
         st.error("Google OAuth configuration not found. Please set up google_oauth_config.json")
@@ -483,7 +482,6 @@ def get_user_info(creds_dict=None):
     except Exception as e:
         st.error(f"Error getting user info: {e}")
         return None
-
 # --- Initialization and Authentication ---
 def initialize_auth_and_session():
     # Initialize basic session state
@@ -494,6 +492,8 @@ def initialize_auth_and_session():
     if "gemini_api_key" not in st.session_state: st.session_state.gemini_api_key = load_api_key()
     # State variable to control main content view: "chat" or "library"
     if "view" not in st.session_state: st.session_state.view = "chat"
+    # State variable to store the selected document in the library
+    if "selected_document" not in st.session_state: st.session_state.selected_document = None
 
 
     # Try to refresh existing credentials if present
@@ -510,9 +510,7 @@ def initialize_auth_and_session():
                 auth_url, _ = flow.authorization_url(prompt='consent')
                 st.markdown(f"""
                     ### 👋 Chào Mừng Đến Với Trợ Lý Giao Thông Công Cộng Tp.HCM
-                    Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông. 
-
-                    Tài liệu cho các hạng mục phương tiện, có thể được xem đầy đủ ở đây: https://github.com/alberttrann/AIGiaoThong/tree/main/documents
+                    Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông
 
                     Vui lòng đăng nhập để tiếp tục.
 
@@ -521,7 +519,7 @@ def initialize_auth_and_session():
 
                 st.subheader("Hướng dẫn thiết lập sau khi đăng nhập")
 
-                # Assuming you have saved the images as images/api_key.png and images/api_key1.png
+               
                 st.image("images/api_key.png", caption="Giao diện nhập API Key (minh họa)")
 
                 st.image("images/api_key1.png", caption="Giao diện tạo API Key trên Google AI Studio (minh họa)")
@@ -586,7 +584,7 @@ init_db()
 
 # --- Streamlit UI ---
 st.set_page_config(page_title="Trợ lý Giao Thông Công Cộng HCM", layout="wide")
-initialize_auth_and_session() # Initialize auth and session state, including 'view'
+initialize_auth_and_session() # Initialize auth and session state, including 'view' and 'selected_document'
 
 if st.session_state.gemini_api_key and GEMINI_CLIENT is None:
     GEMINI_CLIENT = get_gemini_client(st.session_state.gemini_api_key)
@@ -603,7 +601,7 @@ with st.sidebar:
                 # Clear query parameters first
                 st.query_params.clear()
                 # Clear all session state
-                for key in ['user_credentials', 'user_info', 'current_session_id', 'chat_history', 'sessions_list', 'gemini_api_key', 'view']: # Clear 'view' state too
+                for key in ['user_credentials', 'user_info', 'current_session_id', 'chat_history', 'sessions_list', 'gemini_api_key', 'view', 'selected_document']: # Clear 'view' and 'selected_document' state
                     if key in st.session_state:
                         del st.session_state[key]
                 st.rerun()
@@ -612,12 +610,12 @@ with st.sidebar:
         st.divider()
 
     # --- "Thư Viện" button in sidebar ---
-    # Only show library button if logged in
     if st.session_state.user_info:
         if st.button("📚 Thư Viện Tài Liệu", use_container_width=True, key="library_sidebar_button"):
-             st.session_state.view = "library" # Change view state
-             st.rerun() # Rerun to show library view
-        st.divider() # Add a separator
+             st.session_state.view = "library"
+             st.session_state.selected_document = None # Reset selected document when entering library view
+             st.rerun()
+        st.divider()
 
 
     st.header("Phiên trò chuyện")
@@ -713,7 +711,7 @@ if st.session_state.view == "chat":
                         elif not meta.get("search_performed"): st.write("Không có tìm kiếm nào được thực hiện.")
 
     user_prompt = st.chat_input("Câu hỏi về giao thông công cộng TP.HCM:")
-    if user_prompt: # No need to check st.session_state.current_session_id here, handle below
+    if user_prompt: 
         if not st.session_state.current_session_id:
              st.warning("Vui lòng chọn hoặc tạo phiên trò chuyện mới để bắt đầu.")
         elif not GEMINI_CLIENT:
@@ -737,29 +735,38 @@ if st.session_state.view == "chat":
 elif st.session_state.view == "library":
     # --- Library Interface ---
     st.title("Thư Viện Tài Liệu Giao Thông Công Cộng")
-    if st.button("⬅️ Quay lại Trò chuyện", key="back_to_chat_button"):
-        st.session_state.view = "chat" # Change view state back to chat
-        st.rerun() # Rerun to show chat view
+    if st.button("⬅️ Quay lại Trò chuyện", key="back_to_chat_button_library"):
+        st.session_state.view = "chat"
+        st.session_state.selected_document = None # Clear selection when leaving library
+        st.rerun()
 
-    st.markdown("---") # Separator
+    st.markdown("---")
+    st.subheader("Chọn tài liệu để xem nội dung:")
 
     if not GROUNDING_FILENAMES:
         st.info("Không có tài liệu nào được cấu hình để hiển thị.")
     else:
-        for filename in GROUNDING_FILENAMES:
-            file_path_obj = DOC_DIR / filename
-            if file_path_obj.exists():
-                try:
-                    content = file_path_obj.read_text(encoding='utf-8') # Read content with UTF-8 encoding
-                    st.subheader(f"📄 {filename}")
-                    st.markdown(content) # Render Markdown content as rich text
-                    st.markdown("---") # Separator between documents
-                except FileNotFoundError:
-                    st.error(f"Không tìm thấy file: {filename}")
-                    st.markdown("---")
-                except Exception as e:
-                    st.error(f"Lỗi khi đọc file {filename}: {e}")
-                    st.markdown("---")
-            else:
-                st.warning(f"File không tồn tại trong thư mục 'documents': {filename}")
-                st.markdown("---")
+        # Display buttons for each document, e.g., in 3 columns
+        num_columns = 3
+        cols = st.columns(num_columns)
+        for i, filename in enumerate(GROUNDING_FILENAMES):
+            with cols[i % num_columns]:
+                if st.button(f"📄 {filename}", key=f"doc_btn_{filename.replace('.', '_')}", use_container_width=True): # Ensure unique key
+                    st.session_state.selected_document = filename
+
+    # Display content of the selected document
+    if st.session_state.selected_document:
+        st.markdown("---") 
+        selected_filename = st.session_state.selected_document
+        file_path_obj = DOC_DIR / selected_filename
+        if file_path_obj.exists():
+            try:
+                content = file_path_obj.read_text(encoding='utf-8')
+                st.subheader(f"Nội dung tài liệu: {selected_filename}")
+                st.markdown(content) 
+            except FileNotFoundError:
+                st.error(f"Không tìm thấy file: {selected_filename}")
+            except Exception as e:
+                st.error(f"Lỗi khi đọc file {selected_filename}: {e}")
+        else:
+            st.warning(f"File không tồn tại trong thư mục 'documents': {selected_filename}")
