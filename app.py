@@ -230,7 +230,7 @@ def upload_files_to_gemini(client, filenames_list, current_session_id):
                 with st.spinner(f"Uploading {filename}..."):
                     st.write(f"Đang upload: {file_path_obj.name} (Type: {mime_type})")
                     # Pass mime_type to the upload method
-                    gemini_file_obj = client.files.upload(file=file_path_obj, mime_type=mime_type)
+                    gemini_file_obj = client.files.upload(file=file_path_obj)
                     uploaded_file_objects.append(gemini_file_obj)
                     st.success(f"Đã upload: {filename} (ID: {gemini_file_obj.name})")
             except Exception as e:
