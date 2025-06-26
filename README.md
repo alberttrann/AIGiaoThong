@@ -56,6 +56,11 @@ Thỉnh thoảng sẽ có thông báo lỗi 503 như thế này, nhưng đây l�
 
 ![image](https://github.com/user-attachments/assets/7c9c6760-72c9-45cd-b970-cfd67eef0171)
 
+* **Thư viện tài liệu giao thông công cộng**: Nguồn thông tin giao thông công cộng cho người dùng tự xem
+
+![image](https://github.com/user-attachments/assets/03154ab7-a65d-41ea-b8b5-2ca1d48ccd24)
+
+
 ## Hướng dẫn sử dụng cho Người dùng
 
 ### Bắt đầu
