@@ -508,7 +508,6 @@ def initialize_auth_and_session():
         if flow:
             if "code" not in st.query_params:
                 auth_url, _ = flow.authorization_url(prompt='consent')
-                st.image("images/gdgoc.png")
                 st.markdown(f"""
                     ### 👋 Chào Mừng Đến Với Trợ Lý Giao Thông Công Cộng Tp.HCM
                     Bạn có thể hỏi đáp về xe buýt, đường sắt & metro, bến phà & bến đò, xe đạp công cộng, xe điện 4 bánh và xe buýt đường sông
@@ -771,4 +770,5 @@ elif st.session_state.view == "library":
                 st.error(f"Lỗi khi đọc file {selected_filename}: {e}")
         else:
             st.warning(f"File không tồn tại trong thư mục 'documents': {selected_filename}")
+
 
