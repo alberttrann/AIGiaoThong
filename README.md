@@ -189,7 +189,7 @@ Nếu bạn muốn chạy ứng dụng này trên máy tính của mình:
     ```
 
 4.  **Chuẩn bị tài liệu PDF:**
-   Sẵn ở trong folder của dự án đã có các tài liệu liên quan đến thông tin của các loại hình giao thông công cộng trong nội thành, được tạo ra từ tính năng Deep Research(Nghiên cứu sâu) với Gemini 2.5 Pro(Preview) và từ các tài liệu chính thức từ phía các ban quản lý các loại hình giao thông công cộng. Việc tự bổ sung các tài liệu tự tạo sẽ cần có thay đổi đối với logic của code script
+   Sẵn ở trong folder của dự án đã có các tài liệu liên quan đến thông tin của các loại hình giao thông công cộng trong nội thành, được crawl từ các nguồn chính thức từ phía các ban quản lý các loại hình giao thông công cộng & một số trang tin uy tín. 
 
 ### Thiết lập API Key
 
