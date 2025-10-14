@@ -226,9 +226,12 @@ Mở trình duyệt và truy cập vào địa chỉ `http://localhost:8501`.
 your-chatbot-project/
 ├── app.py                     # File mã nguồn chính của ứng dụng Streamlit
 ├── documents/                 # Thư mục chứa các file PDF làm cơ sở kiến thức
-│   ├── tuyen_duong_sat_do_thi_hcm.pdf
-│   ├── xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.pdf
-│   └── xe_buyt.pdf
+│   ├── tuyen_duong_sat_do_thi_hcm.md
+│   ├── xe_dap_cong_cong_xe_dien_4_banh_va_xe_buyt_duong_song.md
+│   └── xe_buyt.md
+|   └── xe_buyt1.md
+|   └── benpa.md
+|
 ├── chat_sessions.db           # File database SQLite lưu trữ lịch sử trò chuyện (tự động tạo khi dự án được khởi chạy)
 ├── requirements.txt           # File liệt kê các thư viện Python cần thiết
 └── README.md                  # File hướng dẫn này
